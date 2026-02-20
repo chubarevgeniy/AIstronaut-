@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap');
+
+:root {
+  font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  background-color: #000;
+  --color-primary: #ffffff;
+  --color-accent: #ff0000;
+  --color-dim: #333333;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #000;
+  color: var(--color-primary);
+}
+
+button {
+  background: transparent;
+  border: 1px solid var(--color-dim);
+  color: var(--color-primary);
+  padding: 0.8rem 1.5rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dotted-bg {
+  background-image: radial-gradient(var(--color-dim) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

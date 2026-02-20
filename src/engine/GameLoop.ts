@@ -206,6 +206,7 @@ export class GameLoop {
         this.state = GameState.GameOver;
         this.ship.vx = 0;
         this.ship.vy = 0;
+        this.audio.update(false);
         this.notifyState();
     }
 

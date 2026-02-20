@@ -46,14 +46,19 @@ export class PhysicsSystem {
             // Find nearest planet for repulsion
             let nearestPlanet: Planet | null = null;
             let minDistSq = Infinity;
+            let minSurfaceDist = Infinity;
 
             for (const planet of planets) {
                 const dx = ship.x - planet.x;
                 const dy = ship.y - planet.y;
                 const distSq = dx * dx + dy * dy;
-                if (distSq < minDistSq) {
-                    minDistSq = distSq;
+                const dist = Math.sqrt(distSq);
+                const surfaceDist = dist - planet.radius;
+
+                if (surfaceDist < minSurfaceDist) {
+                    minSurfaceDist = surfaceDist;
                     nearestPlanet = planet;
+                    minDistSq = distSq;
                 }
             }
 

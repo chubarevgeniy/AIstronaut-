@@ -44,8 +44,37 @@ export class PhysicsSystem {
 
         // Thrust application
         if (ship.isThrusting && ship.fuel > 0) {
-            ship.vx += Math.cos(ship.rotation) * this.thrustPower * deltaTime;
-            ship.vy += Math.sin(ship.rotation) * this.thrustPower * deltaTime;
+            // Find nearest planet for repulsion
+            let nearestPlanet: Planet | null = null;
+            let minDistSq = Infinity;
+
+            for (const planet of planets) {
+                const dx = ship.x - planet.x;
+                const dy = ship.y - planet.y;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq) {
+                    minDistSq = distSq;
+                    nearestPlanet = planet;
+                }
+            }
+
+            // Repulsive force logic (Arcade style)
+            // Push away from the nearest planet instead of forward acceleration
+            if (nearestPlanet && minDistSq < 4000000) { // 2000px range
+                const dx = ship.x - nearestPlanet.x;
+                const dy = ship.y - nearestPlanet.y;
+                const dist = Math.sqrt(minDistSq);
+
+                if (dist > 1) {
+                    ship.vx += (dx / dist) * this.thrustPower * deltaTime;
+                    ship.vy += (dy / dist) * this.thrustPower * deltaTime;
+                }
+            } else {
+                // Fallback: standard thrust if in deep space
+                ship.vx += Math.cos(ship.rotation) * this.thrustPower * deltaTime;
+                ship.vy += Math.sin(ship.rotation) * this.thrustPower * deltaTime;
+            }
+
             ship.fuel -= 10 * deltaTime;
         }
 

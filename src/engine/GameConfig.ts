@@ -1,5 +1,5 @@
 export const GameConfig = {
-    gravityConstant: 120,
+    gravityConstant: 300,
     gravityRadiusScale: 3.0,
     thrustPower: 300,
     minPlanetRadius: 15,

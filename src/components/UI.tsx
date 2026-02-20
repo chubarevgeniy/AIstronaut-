@@ -7,6 +7,8 @@ interface UIProps {
     onStart: (mode: GameMode) => void;
     onPause: () => void;
     onResume: () => void;
+    isMuted: boolean;
+    onToggleMute: () => void;
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -62,84 +64,117 @@ const dotStyle: React.CSSProperties = {
     display: 'inline-block'
 };
 
-export const UI: React.FC<UIProps> = ({ gameState, score, onStart, onPause, onResume }) => {
+const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ isMuted, onToggleMute }) => (
+    <button
+        onClick={onToggleMute}
+        style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            zIndex: 50,
+            padding: '5px 10px',
+            opacity: 0.8,
+            border: '1px solid #666',
+            background: 'black',
+            color: 'white',
+            fontSize: '12px',
+            fontFamily: '"JetBrains Mono", monospace',
+            cursor: 'pointer'
+        }}>
+        {isMuted ? 'UNMUTE' : 'MUTE'}
+    </button>
+);
+
+export const UI: React.FC<UIProps> = ({ gameState, score, onStart, onPause, onResume, isMuted, onToggleMute }) => {
     if (gameState === GameState.Playing) {
         return (
-            <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 20 }}>
-                <button
-                    onClick={onPause}
-                    style={{
-                        padding: '5px 10px',
-                        opacity: 0.8,
-                        border: '1px solid #666',
-                        background: 'black',
-                        fontSize: '12px'
-                    }}>
-                    PAUSE
-                </button>
-            </div>
+            <>
+                <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
+                <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 20 }}>
+                    <button
+                        onClick={onPause}
+                        style={{
+                            padding: '5px 10px',
+                            opacity: 0.8,
+                            border: '1px solid #666',
+                            background: 'black',
+                            fontSize: '12px'
+                        }}>
+                        PAUSE
+                    </button>
+                </div>
+            </>
         );
     }
 
     if (gameState === GameState.Paused) {
         return (
-            <div style={overlayStyle}>
-                <div style={titleStyle}>PAUSED</div>
-                <div style={{...infoTextStyle, color: '#fff', fontSize: '1.2rem'}}>
-                    ALTITUDE: {score} LY
+            <>
+                <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
+                <div style={overlayStyle}>
+                    <div style={titleStyle}>PAUSED</div>
+                    <div style={{...infoTextStyle, color: '#fff', fontSize: '1.2rem'}}>
+                        ALTITUDE: {score} LY
+                    </div>
+                    <div style={buttonGroupStyle}>
+                        <button onClick={onResume}>RESUME</button>
+                        <button onClick={() => onStart(GameMode.Survival)}>RESTART</button>
+                    </div>
                 </div>
-                <div style={buttonGroupStyle}>
-                    <button onClick={onResume}>RESUME</button>
-                    <button onClick={() => onStart(GameMode.Survival)}>RESTART</button>
-                </div>
-            </div>
+            </>
         );
     }
 
     if (gameState === GameState.Start) {
         return (
-            <div style={overlayStyle}>
-                <div style={titleStyle}>
-                    <span style={dotStyle}></span>
-                    AIstronaut
-                </div>
-                <div style={infoTextStyle}>TAP & HOLD TO THRUST</div>
-                <div style={infoTextStyle}>USE GRAVITY ASSISTS</div>
+            <>
+                <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
+                <div style={overlayStyle}>
+                    <div style={titleStyle}>
+                        <span style={dotStyle}></span>
+                        AIstronaut
+                    </div>
+                    <div style={infoTextStyle}>TAP & HOLD TO THRUST</div>
+                    <div style={infoTextStyle}>USE GRAVITY ASSISTS</div>
 
-                <div style={buttonGroupStyle}>
-                    <button onClick={() => onStart(GameMode.Survival)}>
-                        SURVIVAL <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[FUEL]</span>
-                    </button>
-                    <button onClick={() => onStart(GameMode.Zen)}>
-                        ZEN <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[∞]</span>
-                    </button>
-                </div>
+                    <div style={buttonGroupStyle}>
+                        <button onClick={() => onStart(GameMode.Survival)}>
+                            SURVIVAL <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[FUEL]</span>
+                        </button>
+                        <button onClick={() => onStart(GameMode.Zen)}>
+                            ZEN <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[∞]</span>
+                        </button>
+                    </div>
 
-                <div style={{position: 'absolute', bottom: '20px', fontSize: '0.7rem', color: '#444'}}>
-                    V 1.0.0 // SYSTEM READY
+                    <div style={{position: 'absolute', bottom: '20px', fontSize: '0.7rem', color: '#444'}}>
+                        V 1.0.0 // SYSTEM READY
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 
     if (gameState === GameState.GameOver) {
         return (
-            <div style={overlayStyle}>
-                <div style={{...titleStyle, borderBottomColor: 'red', color: 'red'}}>
-                    SIGNAL LOST
-                </div>
-                <div style={{fontSize: '1rem', marginTop: '1rem', marginBottom: '0.5rem'}}>
-                    MAX DISTANCE
-                </div>
-                <div style={{fontSize: '3rem', fontWeight: 700}}>
-                    {score} <span style={{fontSize: '1rem', fontWeight: 300}}>LY</span>
-                </div>
+            <>
+                <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
+                <div style={overlayStyle}>
+                    <div style={{...titleStyle, borderBottomColor: 'red', color: 'red'}}>
+                        SIGNAL LOST
+                    </div>
+                    <div style={{fontSize: '1rem', marginTop: '1rem', marginBottom: '0.5rem'}}>
+                        MAX DISTANCE
+                    </div>
+                    <div style={{fontSize: '3rem', fontWeight: 700}}>
+                        {score} <span style={{fontSize: '1rem', fontWeight: 300}}>LY</span>
+                    </div>
 
-                <div style={buttonGroupStyle}>
-                    <button onClick={() => onStart(GameMode.Survival)}>RETRY MISSION</button>
-                    <button onClick={() => onStart(GameMode.Zen)}>SWITCH TO ZEN</button>
+                    <div style={buttonGroupStyle}>
+                        <button onClick={() => onStart(GameMode.Survival)}>RETRY MISSION</button>
+                        <button onClick={() => onStart(GameMode.Zen)}>SWITCH TO ZEN</button>
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 

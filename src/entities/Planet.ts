@@ -22,7 +22,7 @@ export class Planet {
         this.y = y;
         this.radius = radius;
         this.type = type;
-        this.gravityRadius = radius * 4;
+        this.gravityRadius = radius * 2.5;
 
         // Mass proportional to area (radius squared)
         // Adjust density based on type if needed

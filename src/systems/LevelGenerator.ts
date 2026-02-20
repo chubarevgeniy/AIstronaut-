@@ -3,7 +3,7 @@ import { Planet, PlanetType } from '../entities/Planet';
 
 export class LevelGenerator {
     private visitedChunks: Set<string> = new Set();
-    private chunkSize: number = 800; // Chunk size in pixels
+    private chunkSize: number = 600; // Reduced chunk size for denser generation
 
     generate(shipX: number, shipY: number): Planet[] {
         const newPlanets: Planet[] = [];
@@ -21,8 +21,8 @@ export class LevelGenerator {
                     this.visitedChunks.add(chunkKey);
 
                     // Generate planets in this chunk
-                    // Limit number of planets per chunk (0 to 2)
-                    const count = Math.floor(Math.random() * 3);
+                    // Increased density: 2 to 5 planets
+                    const count = 2 + Math.floor(Math.random() * 4);
 
                     for (let i = 0; i < count; i++) {
                         // Position within chunk
@@ -30,15 +30,12 @@ export class LevelGenerator {
                         const y = (chunkY * this.chunkSize) + Math.random() * this.chunkSize;
 
                         // Check collision with ship start (approx)
-                        // If chunk is (0,0), avoid placing right on top of ship (0,0)
-                        // Also avoid placing where the manual starter planet is (180, -100)
-                        // Let's clear a larger box around (0,0)
                         if (chunkX === 0 && chunkY === 0) {
                              if (Math.abs(x) < 350 && Math.abs(y) < 350) continue;
                         }
 
-                        // Random Radius: 30 to 120
-                        const radius = 30 + Math.random() * 90;
+                        // Reduced Radius: 15 to 50 (smaller planets)
+                        const radius = 15 + Math.random() * 35;
 
                         // Random Type
                         const types = Object.values(PlanetType) as PlanetType[];
@@ -50,6 +47,25 @@ export class LevelGenerator {
             }
         }
         return newPlanets;
+    }
+
+    // Remove visited chunks that are far away to allow regeneration if returned to
+    cleanup(shipX: number, shipY: number, cleanupRadius: number) {
+        const currentChunkX = Math.floor(shipX / this.chunkSize);
+        const currentChunkY = Math.floor(shipY / this.chunkSize);
+        const cleanupChunkRadius = Math.ceil(cleanupRadius / this.chunkSize);
+
+        for (const key of this.visitedChunks) {
+            const [cxStr, cyStr] = key.split(',');
+            const cx = parseInt(cxStr);
+            const cy = parseInt(cyStr);
+
+            // Simple Manhattan or Chebyshev distance check is faster
+            if (Math.abs(cx - currentChunkX) > cleanupChunkRadius ||
+                Math.abs(cy - currentChunkY) > cleanupChunkRadius) {
+                this.visitedChunks.delete(key);
+            }
+        }
     }
 
     reset() {

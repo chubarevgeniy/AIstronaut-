@@ -6,6 +6,7 @@ import { InputHandler } from '../systems/Input';
 import { Renderer } from '../systems/Renderer';
 import { GameState, GameMode } from './GameState';
 import { ParticleSystem } from '../systems/Particles';
+import { AudioController } from '../systems/AudioController';
 
 export class GameLoop {
     private canvas: HTMLCanvasElement;
@@ -17,6 +18,7 @@ export class GameLoop {
     private physics: PhysicsSystem;
     private input: InputHandler;
     private levelGenerator: LevelGenerator;
+    private audio: AudioController;
     private renderer: Renderer;
     private particleSystem: ParticleSystem;
     private planets: Planet[] = [];
@@ -36,6 +38,7 @@ export class GameLoop {
         this.input = new InputHandler(canvas);
         this.physics = new PhysicsSystem();
         this.levelGenerator = new LevelGenerator();
+        this.audio = new AudioController();
         this.particleSystem = new ParticleSystem();
 
         // Initial setup
@@ -99,8 +102,13 @@ export class GameLoop {
         if (this.isRunning) return;
         this.isRunning = true;
         this.lastTime = performance.now();
+        this.audio.resume();
         this.loop(this.lastTime);
         console.log("Game loop started");
+    }
+
+    setMute(muted: boolean) {
+        this.audio.setMute(muted);
     }
 
     stop() {
@@ -174,17 +182,24 @@ export class GameLoop {
             );
         }
         this.particleSystem.update(deltaTime);
+        this.audio.update(this.ship.isThrusting && this.ship.fuel > 0);
 
         // Generate planets
         const newPlanets = this.levelGenerator.generate(this.ship.x, this.ship.y);
         this.planets.push(...newPlanets);
 
         // Cleanup old planets (distance based)
+        const cleanupRadius = 3000;
+        const cleanupRadiusSq = cleanupRadius * cleanupRadius;
+
         this.planets = this.planets.filter(p => {
             const dx = p.x - this.ship.x;
             const dy = p.y - this.ship.y;
-            return dx * dx + dy * dy < 9000000; // 3000^2
+            return dx * dx + dy * dy < cleanupRadiusSq;
         });
+
+        // Also cleanup visited chunks to allow regeneration
+        this.levelGenerator.cleanup(this.ship.x, this.ship.y, cleanupRadius);
     }
 
     private gameOver() {

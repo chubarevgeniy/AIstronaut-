@@ -8,6 +8,7 @@ export const GameCanvas: React.FC = () => {
     const gameLoopRef = useRef<GameLoop | null>(null);
     const [gameState, setGameState] = useState<GameState>(GameState.Start);
     const [score, setScore] = useState<number>(0);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -64,6 +65,14 @@ export const GameCanvas: React.FC = () => {
         gameLoopRef.current?.resume();
     };
 
+    const handleToggleMute = () => {
+        const nextMuted = !isMuted;
+        setIsMuted(nextMuted);
+        if (gameLoopRef.current) {
+            gameLoopRef.current.setMute(nextMuted);
+        }
+    };
+
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <canvas
@@ -76,6 +85,8 @@ export const GameCanvas: React.FC = () => {
                 onStart={handleStart}
                 onPause={handlePause}
                 onResume={handleResume}
+                isMuted={isMuted}
+                onToggleMute={handleToggleMute}
             />
         </div>
     );

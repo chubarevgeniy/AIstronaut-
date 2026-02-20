@@ -9,9 +9,13 @@ interface UIProps {
     onStart: (mode: GameMode) => void;
     onPause: () => void;
     onResume: () => void;
+    onExit: () => void;
     isMuted: boolean;
     onToggleMute: () => void;
     onResetHighScore: () => void;
+    isFuelEmpty?: boolean;
+    hasEjected?: boolean;
+    onEject?: () => void;
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -20,6 +24,8 @@ const overlayStyle: React.CSSProperties = {
     left: 0,
     width: '100%',
     height: '100%',
+    paddingTop: 'max(env(safe-area-inset-top), 20px)',
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -72,7 +78,7 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
         onClick={onToggleMute}
         style={{
             position: 'absolute',
-            top: 20,
+            top: 'max(env(safe-area-inset-top), 20px)',
             left: 20,
             zIndex: 50,
             padding: '5px 10px',
@@ -88,15 +94,15 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
     </button>
 );
 
-export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, onStart, onPause, onResume, isMuted, onToggleMute, onResetHighScore }) => {
+export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, onStart, onPause, onResume, onExit, isMuted, onToggleMute, onResetHighScore, isFuelEmpty, hasEjected, onEject }) => {
     if (gameState === GameState.Playing) {
         return (
             <>
-                <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', color: 'white', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.8rem', opacity: 0.7, pointerEvents: 'none' }}>
+                <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top), 20px)', left: '50%', transform: 'translateX(-50%)', color: 'white', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.8rem', opacity: 0.7, pointerEvents: 'none' }}>
                     BEST: {Math.max(score, highScore)} LY
                 </div>
                 <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
-                <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 20 }}>
+                <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top), 20px)', right: 20, zIndex: 20 }}>
                     <button
                         onClick={onPause}
                         style={{
@@ -109,6 +115,23 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, o
                         PAUSE
                     </button>
                 </div>
+                {isFuelEmpty && !hasEjected && (
+                    <div style={{ position: 'absolute', bottom: '100px', left: '50%', transform: 'translateX(-50%)', zIndex: 30 }}>
+                        <button
+                            onClick={onEject}
+                            style={{
+                                padding: '10px 20px',
+                                border: '1px solid red',
+                                color: 'red',
+                                background: 'rgba(50, 0, 0, 0.8)',
+                                fontSize: '1rem',
+                                fontWeight: 'bold',
+                                animation: 'pulse 1s infinite'
+                            }}>
+                            EJECT
+                        </button>
+                    </div>
+                )}
             </>
         );
     }
@@ -125,6 +148,7 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, o
                     <div style={buttonGroupStyle}>
                         <button onClick={onResume}>RESUME</button>
                         <button onClick={() => onStart(GameMode.Survival)}>RESTART</button>
+                        <button onClick={onExit} style={{borderTop: '1px dotted #555', paddingTop: '10px'}}>EXIT TO MENU</button>
                     </div>
                 </div>
             </>

@@ -9,6 +9,7 @@ export class Ship {
     isThrusting: boolean;
     fuel: number;
     maxFuel: number;
+    hasEjected: boolean;
 
     constructor(x: number, y: number) {
         this.x = x;
@@ -21,5 +22,6 @@ export class Ship {
         this.isThrusting = false;
         this.maxFuel = 100;
         this.fuel = this.maxFuel;
+        this.hasEjected = false;
     }
 }

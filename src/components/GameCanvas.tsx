@@ -9,24 +9,41 @@ export const GameCanvas: React.FC = () => {
     const gameLoopRef = useRef<GameLoop | null>(null);
     const [gameState, setGameState] = useState<GameState>(GameState.Start);
     const [score, setScore] = useState<number>(0);
-    const [highScore, setHighScore] = useState<number>(() => {
-        const saved = localStorage.getItem('highScore');
-        return saved ? parseInt(saved, 10) : 0;
+    const [highScores, setHighScores] = useState<{ [key in GameMode]: number }>(() => {
+        const savedSurvival = localStorage.getItem('highScore_survival');
+        const savedZen = localStorage.getItem('highScore_zen');
+
+        // Migration logic for legacy high score
+        let survival = savedSurvival ? parseInt(savedSurvival, 10) : 0;
+        if (!savedSurvival) {
+            const legacy = localStorage.getItem('highScore');
+            if (legacy) {
+                survival = parseInt(legacy, 10);
+                localStorage.setItem('highScore_survival', legacy);
+            }
+        }
+
+        const zen = savedZen ? parseInt(savedZen, 10) : 0;
+        return { [GameMode.Survival]: survival, [GameMode.Zen]: zen };
     });
     const [gameMode, setGameMode] = useState<GameMode>(GameMode.Survival);
     const [isMuted, setIsMuted] = useState<boolean>(false);
+    const [isFuelEmpty, setIsFuelEmpty] = useState<boolean>(false);
+    const [hasEjected, setHasEjected] = useState<boolean>(false);
 
     useEffect(() => {
         if (gameState === GameState.GameOver) {
-            setHighScore(prev => {
-                if (score > prev) {
-                    localStorage.setItem('highScore', score.toString());
-                    return score;
+            setHighScores(prev => {
+                const currentHigh = prev[gameMode];
+                if (score > currentHigh) {
+                    const newScores = { ...prev, [gameMode]: score };
+                    localStorage.setItem(`highScore_${gameMode}`, score.toString());
+                    return newScores;
                 }
                 return prev;
             });
         }
-    }, [gameState, score]);
+    }, [gameState, score, gameMode]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -39,6 +56,10 @@ export const GameCanvas: React.FC = () => {
         gameLoopRef.current.onStateChange = (state, score) => {
             setGameState(state);
             setScore(score);
+        };
+
+        gameLoopRef.current.onFuelEmpty = () => {
+            setIsFuelEmpty(true);
         };
 
         // Start rendering loop immediately (renders start screen / bg)
@@ -72,6 +93,8 @@ export const GameCanvas: React.FC = () => {
     const handleStart = (mode: GameMode) => {
         if (gameLoopRef.current) {
             setGameMode(mode);
+            setIsFuelEmpty(false);
+            setHasEjected(false);
             // Explicitly resume audio context on user gesture
             gameLoopRef.current.audio.resume();
             gameLoopRef.current.startGame(mode);
@@ -95,8 +118,25 @@ export const GameCanvas: React.FC = () => {
     };
 
     const handleResetHighScore = () => {
-        localStorage.removeItem('highScore');
-        setHighScore(0);
+        localStorage.removeItem('highScore_survival');
+        localStorage.removeItem('highScore_zen');
+        setHighScores({ [GameMode.Survival]: 0, [GameMode.Zen]: 0 });
+    };
+
+    const handleExitToMenu = () => {
+        if (gameLoopRef.current) {
+            gameLoopRef.current.stop();
+            // Reset game state
+            gameLoopRef.current.reset();
+        }
+        setGameState(GameState.Start);
+    };
+
+    const handleEject = () => {
+        if (gameLoopRef.current) {
+            gameLoopRef.current.eject();
+            setHasEjected(true);
+        }
     };
 
     return (
@@ -109,13 +149,17 @@ export const GameCanvas: React.FC = () => {
                 gameState={gameState}
                 gameMode={gameMode}
                 score={score}
-                highScore={highScore}
+                highScore={highScores[gameMode]}
                 onStart={handleStart}
                 onPause={handlePause}
                 onResume={handleResume}
+                onExit={handleExitToMenu}
                 isMuted={isMuted}
                 onToggleMute={handleToggleMute}
                 onResetHighScore={handleResetHighScore}
+                isFuelEmpty={isFuelEmpty}
+                hasEjected={hasEjected}
+                onEject={handleEject}
             />
             <DebugMenu />
         </div>

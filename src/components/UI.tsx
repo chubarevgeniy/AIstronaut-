@@ -5,7 +5,7 @@ interface UIProps {
     gameState: GameState;
     gameMode: GameMode;
     score: number;
-    highScore: number;
+    highScores: { [key in GameMode]: number };
     onStart: (mode: GameMode) => void;
     onPause: () => void;
     onResume: () => void;
@@ -94,14 +94,10 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
     </button>
 );
 
-export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, onStart, onPause, onResume, onExit, isMuted, onToggleMute, onResetHighScore, isFuelEmpty, hasEjected, onEject }) => {
+export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScores, onStart, onPause, onResume, onExit, isMuted, onToggleMute, onResetHighScore, isFuelEmpty, hasEjected, onEject }) => {
     if (gameState === GameState.Playing) {
         return (
             <>
-                <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top), 20px)', left: '50%', transform: 'translateX(-50%)', color: 'white', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.8rem', opacity: 0.7, pointerEvents: 'none' }}>
-                    BEST: {Math.max(score, highScore)} LY
-                </div>
-                <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
                 <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top), 20px)', right: 20, zIndex: 20 }}>
                     <button
                         onClick={onPause}
@@ -168,7 +164,8 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, o
                     <div style={infoTextStyle}>USE GRAVITY ASSISTS</div>
 
                     <div style={{ marginTop: '1rem', fontSize: '1rem', color: '#fff' }}>
-                        BEST: {highScore} LY
+                        BEST (SURVIVAL): {highScores[GameMode.Survival]} LY<br/>
+                        BEST (ZEN): {highScores[GameMode.Zen]} LY
                     </div>
 
                     <div style={buttonGroupStyle}>
@@ -213,7 +210,7 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, o
                     </div>
 
                     <div style={{ fontSize: '1rem', color: '#aaa', marginTop: '0.5rem' }}>
-                        BEST: {highScore} LY
+                        BEST: {highScores[gameMode]} LY
                     </div>
 
                     <div style={buttonGroupStyle}>

@@ -195,15 +195,15 @@ export class Renderer {
         // Altitude
         const altitude = Math.floor(-ship.y / 100);
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillText(`ALT: ${altitude.toString().padStart(6, '0')} LY`, 10, 20);
+        this.ctx.fillText(`ALT: ${altitude.toString().padStart(6, '0')} LY`, 10, 60);
 
         // Fuel
         if (ship.maxFuel !== Infinity) {
-            this.ctx.fillText(`FUEL`, 10, 40);
+            this.ctx.fillText(`FUEL`, 10, 80);
 
             // Dotted Fuel Bar
             const barX = 50;
-            const barY = 32;
+            const barY = 72;
             const totalDots = 20;
             const dotSize = 3;
             const dotGap = 2;
@@ -221,7 +221,7 @@ export class Renderer {
             }
         } else {
              this.ctx.fillStyle = '#666';
-             this.ctx.fillText(`FUEL: ∞`, 10, 40);
+             this.ctx.fillText(`FUEL: ∞`, 10, 80);
         }
 
         this.ctx.restore();

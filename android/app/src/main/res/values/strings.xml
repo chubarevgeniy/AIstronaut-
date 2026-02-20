@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AIstronaut</string>
+    <string name="title_activity_main">AIstronaut</string>
+    <string name="package_name">com.aistronaut.app</string>
+    <string name="custom_url_scheme">com.aistronaut.app</string>
+</resources>

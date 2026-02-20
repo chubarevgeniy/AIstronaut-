@@ -149,7 +149,7 @@ export const GameCanvas: React.FC = () => {
                 gameState={gameState}
                 gameMode={gameMode}
                 score={score}
-                highScore={highScores[gameMode]}
+                highScores={highScores}
                 onStart={handleStart}
                 onPause={handlePause}
                 onResume={handleResume}
@@ -161,7 +161,7 @@ export const GameCanvas: React.FC = () => {
                 hasEjected={hasEjected}
                 onEject={handleEject}
             />
-            <DebugMenu />
+            <DebugMenu gameState={gameState} />
         </div>
     );
 };

@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { GameConfig } from '../engine/GameConfig';
+import { GameState } from '../engine/GameState';
 
 const defaultValues = { ...GameConfig };
 
-export const DebugMenu: React.FC = () => {
+interface DebugMenuProps {
+    gameState: GameState;
+}
+
+export const DebugMenu: React.FC<DebugMenuProps> = ({ gameState }) => {
     const [isOpen, setIsOpen] = useState(false);
     // Force update state to re-render inputs when values change
     const [, setTick] = useState(0);
@@ -27,6 +32,8 @@ export const DebugMenu: React.FC = () => {
         navigator.clipboard.writeText(JSON.stringify(GameConfig, null, 2));
         alert("Config copied to clipboard!");
     };
+
+    if (gameState === GameState.Playing) return null;
 
     if (!isOpen) {
         return (

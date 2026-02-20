@@ -102,6 +102,7 @@ export class GameLoop {
     start() {
         if (this.isRunning) return;
         this.isRunning = true;
+        this.input.attach();
         this.lastTime = performance.now();
         this.audio.resume();
         this.loop(this.lastTime);
@@ -118,7 +119,7 @@ export class GameLoop {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
         }
-        this.input.cleanup();
+        this.input.detach();
     }
 
     private loop(currentTime: number) {

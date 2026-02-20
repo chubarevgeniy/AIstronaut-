@@ -1,9 +1,8 @@
 import { Ship } from '../entities/Ship';
 import { Planet } from '../entities/Planet';
+import { GameConfig } from '../engine/GameConfig';
 
 export class PhysicsSystem {
-    private G: number = 100; // Reduced gravity
-    private thrustPower: number = 300; // Adjusted thrust
 
     update(ship: Ship, planets: Planet[], deltaTime: number): boolean {
         // Calculate gravity from planets
@@ -26,7 +25,7 @@ export class PhysicsSystem {
             // Avoid applying massive forces when very close (inside planet)
             // Also respect gravity radius
             if (dist > 10 && dist < planet.gravityRadius) {
-                const force = (this.G * planet.mass) / distSq;
+                const force = (GameConfig.gravityConstant * planet.mass) / distSq;
                 gx += force * (dx / dist);
                 gy += force * (dy / dist);
             }
@@ -66,13 +65,13 @@ export class PhysicsSystem {
                 const dist = Math.sqrt(minDistSq);
 
                 if (dist > 1) {
-                    ship.vx += (dx / dist) * this.thrustPower * deltaTime;
-                    ship.vy += (dy / dist) * this.thrustPower * deltaTime;
+                    ship.vx += (dx / dist) * GameConfig.thrustPower * deltaTime;
+                    ship.vy += (dy / dist) * GameConfig.thrustPower * deltaTime;
                 }
             } else {
                 // Fallback: standard thrust if in deep space
-                ship.vx += Math.cos(ship.rotation) * this.thrustPower * deltaTime;
-                ship.vy += Math.sin(ship.rotation) * this.thrustPower * deltaTime;
+                ship.vx += Math.cos(ship.rotation) * GameConfig.thrustPower * deltaTime;
+                ship.vy += Math.sin(ship.rotation) * GameConfig.thrustPower * deltaTime;
             }
 
             ship.fuel -= 10 * deltaTime;

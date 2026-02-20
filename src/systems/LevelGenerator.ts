@@ -1,14 +1,14 @@
 
 import { Planet, PlanetType } from '../entities/Planet';
+import { GameConfig } from '../engine/GameConfig';
 
 export class LevelGenerator {
     private visitedChunks: Set<string> = new Set();
-    private chunkSize: number = 600; // Reduced chunk size for denser generation
 
     generate(shipX: number, shipY: number): Planet[] {
         const newPlanets: Planet[] = [];
-        const currentChunkX = Math.floor(shipX / this.chunkSize);
-        const currentChunkY = Math.floor(shipY / this.chunkSize);
+        const currentChunkX = Math.floor(shipX / GameConfig.chunkSize);
+        const currentChunkY = Math.floor(shipY / GameConfig.chunkSize);
 
         // Check 3x3 grid around current chunk
         for (let dx = -1; dx <= 1; dx++) {
@@ -21,21 +21,19 @@ export class LevelGenerator {
                     this.visitedChunks.add(chunkKey);
 
                     // Generate planets in this chunk
-                    // Increased density: 2 to 5 planets
-                    const count = 2 + Math.floor(Math.random() * 4);
+                    const count = GameConfig.minPlanetsPerChunk + Math.floor(Math.random() * (GameConfig.maxPlanetsPerChunk - GameConfig.minPlanetsPerChunk));
 
                     for (let i = 0; i < count; i++) {
                         // Position within chunk
-                        const x = (chunkX * this.chunkSize) + Math.random() * this.chunkSize;
-                        const y = (chunkY * this.chunkSize) + Math.random() * this.chunkSize;
+                        const x = (chunkX * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+                        const y = (chunkY * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
 
                         // Check collision with ship start (approx)
                         if (chunkX === 0 && chunkY === 0) {
                              if (Math.abs(x) < 350 && Math.abs(y) < 350) continue;
                         }
 
-                        // Reduced Radius: 15 to 50 (smaller planets)
-                        const radius = 15 + Math.random() * 35;
+                        const radius = GameConfig.minPlanetRadius + Math.random() * (GameConfig.maxPlanetRadius - GameConfig.minPlanetRadius);
 
                         // Random Type
                         const types = Object.values(PlanetType) as PlanetType[];
@@ -51,9 +49,9 @@ export class LevelGenerator {
 
     // Remove visited chunks that are far away to allow regeneration if returned to
     cleanup(shipX: number, shipY: number, cleanupRadius: number) {
-        const currentChunkX = Math.floor(shipX / this.chunkSize);
-        const currentChunkY = Math.floor(shipY / this.chunkSize);
-        const cleanupChunkRadius = Math.ceil(cleanupRadius / this.chunkSize);
+        const currentChunkX = Math.floor(shipX / GameConfig.chunkSize);
+        const currentChunkY = Math.floor(shipY / GameConfig.chunkSize);
+        const cleanupChunkRadius = Math.ceil(cleanupRadius / GameConfig.chunkSize);
 
         for (const key of this.visitedChunks) {
             const [cxStr, cyStr] = key.split(',');

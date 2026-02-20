@@ -18,7 +18,7 @@ export class GameLoop {
     private physics: PhysicsSystem;
     private input: InputHandler;
     private levelGenerator: LevelGenerator;
-    private audio: AudioController;
+    public audio: AudioController;
     private renderer: Renderer;
     private particleSystem: ParticleSystem;
     private planets: Planet[] = [];

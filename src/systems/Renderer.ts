@@ -72,10 +72,49 @@ export class Renderer {
         // Draw Ship
         this.drawShip(ship);
 
+        // Draw Nearest Planet Indicator
+        this.drawNearestPlanetIndicator(ship, planets);
+
         this.ctx.restore();
 
         // Draw HUD
         this.drawHUD(ship);
+    }
+
+    private drawNearestPlanetIndicator(ship: Ship, planets: Planet[]) {
+        let nearest: Planet | null = null;
+        let minDistSq = Infinity;
+
+        for (const p of planets) {
+            const dx = p.x - ship.x;
+            const dy = p.y - ship.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                nearest = p;
+            }
+        }
+
+        if (nearest) {
+            const dx = nearest.x - ship.x;
+            const dy = nearest.y - ship.y;
+            const dist = Math.sqrt(minDistSq);
+
+            // Only draw if within a reasonable range (e.g. 2000px, same as thrust logic)
+            if (dist > 1 && dist < 2000) {
+                const indicatorDist = 40; // Distance from ship center
+                const ix = (dx / dist) * indicatorDist;
+                const iy = (dy / dist) * indicatorDist;
+
+                this.ctx.save();
+                this.ctx.translate(ship.x + ix, ship.y + iy);
+                this.ctx.fillStyle = 'red';
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, 2, 0, Math.PI * 2); // Small red dot
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+        }
     }
 
     private drawStars(camX: number, camY: number) {

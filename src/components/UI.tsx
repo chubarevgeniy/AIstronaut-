@@ -3,6 +3,7 @@ import { GameState, GameMode } from '../engine/GameState';
 
 interface UIProps {
     gameState: GameState;
+    gameMode: GameMode;
     score: number;
     onStart: (mode: GameMode) => void;
     onPause: () => void;
@@ -85,7 +86,7 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
     </button>
 );
 
-export const UI: React.FC<UIProps> = ({ gameState, score, onStart, onPause, onResume, isMuted, onToggleMute }) => {
+export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, onStart, onPause, onResume, isMuted, onToggleMute }) => {
     if (gameState === GameState.Playing) {
         return (
             <>
@@ -163,15 +164,19 @@ export const UI: React.FC<UIProps> = ({ gameState, score, onStart, onPause, onRe
                         SIGNAL LOST
                     </div>
                     <div style={{fontSize: '1rem', marginTop: '1rem', marginBottom: '0.5rem'}}>
-                        MAX DISTANCE
+                        DISTANCE
                     </div>
                     <div style={{fontSize: '3rem', fontWeight: 700}}>
                         {score} <span style={{fontSize: '1rem', fontWeight: 300}}>LY</span>
                     </div>
 
                     <div style={buttonGroupStyle}>
-                        <button onClick={() => onStart(GameMode.Survival)}>RETRY MISSION</button>
-                        <button onClick={() => onStart(GameMode.Zen)}>SWITCH TO ZEN</button>
+                        <button onClick={() => onStart(gameMode)}>RETRY MISSION</button>
+                        {gameMode === GameMode.Survival ? (
+                            <button onClick={() => onStart(GameMode.Zen)}>SWITCH TO ZEN</button>
+                        ) : (
+                            <button onClick={() => onStart(GameMode.Survival)}>SWITCH TO SURVIVAL</button>
+                        )}
                     </div>
                 </div>
             </>

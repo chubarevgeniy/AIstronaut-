@@ -7,4 +7,5 @@ export const GameConfig = {
     minPlanetsPerChunk: 2,
     maxPlanetsPerChunk: 5,
     chunkSize: 600,
+    shipCollisionRadius: 5,
 };

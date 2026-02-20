@@ -5,11 +5,13 @@ interface UIProps {
     gameState: GameState;
     gameMode: GameMode;
     score: number;
+    highScore: number;
     onStart: (mode: GameMode) => void;
     onPause: () => void;
     onResume: () => void;
     isMuted: boolean;
     onToggleMute: () => void;
+    onResetHighScore: () => void;
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -86,10 +88,13 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
     </button>
 );
 
-export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, onStart, onPause, onResume, isMuted, onToggleMute }) => {
+export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScore, onStart, onPause, onResume, isMuted, onToggleMute, onResetHighScore }) => {
     if (gameState === GameState.Playing) {
         return (
             <>
+                <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', color: 'white', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.8rem', opacity: 0.7, pointerEvents: 'none' }}>
+                    BEST: {Math.max(score, highScore)} LY
+                </div>
                 <MuteButton isMuted={isMuted} onToggleMute={onToggleMute} />
                 <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 20 }}>
                     <button
@@ -138,12 +143,25 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, onStart, onP
                     <div style={infoTextStyle}>TAP & HOLD TO THRUST</div>
                     <div style={infoTextStyle}>USE GRAVITY ASSISTS</div>
 
+                    <div style={{ marginTop: '1rem', fontSize: '1rem', color: '#fff' }}>
+                        BEST: {highScore} LY
+                    </div>
+
                     <div style={buttonGroupStyle}>
                         <button onClick={() => onStart(GameMode.Survival)}>
                             SURVIVAL <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[FUEL]</span>
                         </button>
                         <button onClick={() => onStart(GameMode.Zen)}>
                             ZEN <span style={{fontSize: '0.7em', color: '#666', marginLeft: '5px'}}>[∞]</span>
+                        </button>
+                    </div>
+
+                    <div style={{ marginTop: '1rem' }}>
+                        <button
+                            onClick={onResetHighScore}
+                            style={{ background: 'transparent', border: 'none', color: '#555', fontSize: '0.7rem', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            RESET DATA
                         </button>
                     </div>
 
@@ -168,6 +186,10 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, onStart, onP
                     </div>
                     <div style={{fontSize: '3rem', fontWeight: 700}}>
                         {score} <span style={{fontSize: '1rem', fontWeight: 300}}>LY</span>
+                    </div>
+
+                    <div style={{ fontSize: '1rem', color: '#aaa', marginTop: '0.5rem' }}>
+                        BEST: {highScore} LY
                     </div>
 
                     <div style={buttonGroupStyle}>

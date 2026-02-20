@@ -9,8 +9,24 @@ export const GameCanvas: React.FC = () => {
     const gameLoopRef = useRef<GameLoop | null>(null);
     const [gameState, setGameState] = useState<GameState>(GameState.Start);
     const [score, setScore] = useState<number>(0);
+    const [highScore, setHighScore] = useState<number>(() => {
+        const saved = localStorage.getItem('highScore');
+        return saved ? parseInt(saved, 10) : 0;
+    });
     const [gameMode, setGameMode] = useState<GameMode>(GameMode.Survival);
     const [isMuted, setIsMuted] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (gameState === GameState.GameOver) {
+            setHighScore(prev => {
+                if (score > prev) {
+                    localStorage.setItem('highScore', score.toString());
+                    return score;
+                }
+                return prev;
+            });
+        }
+    }, [gameState, score]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -78,6 +94,11 @@ export const GameCanvas: React.FC = () => {
         }
     };
 
+    const handleResetHighScore = () => {
+        localStorage.removeItem('highScore');
+        setHighScore(0);
+    };
+
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <canvas
@@ -88,11 +109,13 @@ export const GameCanvas: React.FC = () => {
                 gameState={gameState}
                 gameMode={gameMode}
                 score={score}
+                highScore={highScore}
                 onStart={handleStart}
                 onPause={handlePause}
                 onResume={handleResume}
                 isMuted={isMuted}
                 onToggleMute={handleToggleMute}
+                onResetHighScore={handleResetHighScore}
             />
             <DebugMenu />
         </div>

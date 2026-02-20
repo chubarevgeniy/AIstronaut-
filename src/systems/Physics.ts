@@ -17,7 +17,7 @@ export class PhysicsSystem {
             const dist = Math.sqrt(distSq);
 
             // Collision detection
-            if (dist < planet.radius + 10) { // Simple circle collision, +10 for ship size approx
+            if (dist < planet.radius + GameConfig.shipCollisionRadius) { // Simple circle collision
                 hasCollided = true;
             }
 

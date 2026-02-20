@@ -1,6 +1,6 @@
 import { Ship } from '../entities/Ship';
 import { PhysicsSystem } from '../systems/Physics';
-import { Planet } from '../entities/Planet';
+import { Planet, PlanetType } from '../entities/Planet';
 import { LevelGenerator } from '../systems/LevelGenerator';
 import { InputHandler } from '../systems/Input';
 import { Renderer } from '../systems/Renderer';
@@ -40,7 +40,7 @@ export class GameLoop {
 
         // Initial setup
         this.ship = new Ship(0, 0);
-        this.levelGenerator.reset(this.ship.y - 500);
+        this.levelGenerator.reset();
 
         this.renderer = new Renderer(context, canvas.width, canvas.height);
     }
@@ -70,7 +70,7 @@ export class GameLoop {
 
     reset() {
         this.ship = new Ship(0, 0);
-        this.ship.vy = -100; // Initial upward velocity
+        this.ship.vy = -60; // Initial upward velocity
 
         if (this.mode === GameMode.Zen) {
             this.ship.maxFuel = Infinity;
@@ -79,7 +79,17 @@ export class GameLoop {
 
         this.planets = [];
         this.particleSystem.particles = [];
-        this.levelGenerator.reset(this.ship.y - 500);
+        this.levelGenerator.reset();
+
+        // Add Starter Planet
+        // Positioned to the side to create an initial orbit
+        // Ship is at (0,0) moving (0, -60)
+        // Planet at (200, -200) pulls ship right+up
+        // Let's try (150, -100)
+        this.planets.push(new Planet(180, -100, 80, PlanetType.Ice));
+        // Force generate around start
+        const initialPlanets = this.levelGenerator.generate(0, 0);
+        this.planets.push(...initialPlanets);
 
         // Initial render
         this.draw();
@@ -166,12 +176,15 @@ export class GameLoop {
         this.particleSystem.update(deltaTime);
 
         // Generate planets
-        const newPlanets = this.levelGenerator.generate(this.ship.y);
+        const newPlanets = this.levelGenerator.generate(this.ship.x, this.ship.y);
         this.planets.push(...newPlanets);
 
-        // Cleanup old planets
-        const cleanupThreshold = this.ship.y + this.canvas.height * 2;
-        this.planets = this.planets.filter(p => p.y < cleanupThreshold);
+        // Cleanup old planets (distance based)
+        this.planets = this.planets.filter(p => {
+            const dx = p.x - this.ship.x;
+            const dy = p.y - this.ship.y;
+            return dx * dx + dy * dy < 9000000; // 3000^2
+        });
     }
 
     private gameOver() {

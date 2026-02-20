@@ -13,6 +13,7 @@ export class Planet {
     y: number;
     radius: number;
     mass: number;
+    gravityRadius: number;
     type: PlanetType;
     color: string;
 
@@ -21,10 +22,11 @@ export class Planet {
         this.y = y;
         this.radius = radius;
         this.type = type;
+        this.gravityRadius = radius * 4;
 
         // Mass proportional to area (radius squared)
         // Adjust density based on type if needed
-        this.mass = radius * radius * 10;
+        this.mass = radius * radius * 1;
 
         switch (type) {
             case PlanetType.Dead:

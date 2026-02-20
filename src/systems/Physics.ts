@@ -2,7 +2,7 @@ import { Ship } from '../entities/Ship';
 import { Planet } from '../entities/Planet';
 
 export class PhysicsSystem {
-    private G: number = 500; // Reduced gravity
+    private G: number = 100; // Reduced gravity
     private thrustPower: number = 300; // Adjusted thrust
 
     update(ship: Ship, planets: Planet[], deltaTime: number): boolean {
@@ -24,7 +24,8 @@ export class PhysicsSystem {
 
             // Simple gravity logic: pull towards center
             // Avoid applying massive forces when very close (inside planet)
-            if (dist > 10) {
+            // Also respect gravity radius
+            if (dist > 10 && dist < planet.gravityRadius) {
                 const force = (this.G * planet.mass) / distSq;
                 gx += force * (dx / dist);
                 gy += force * (dy / dist);

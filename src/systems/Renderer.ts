@@ -98,6 +98,15 @@ export class Renderer {
     }
 
     private drawPlanet(planet: Planet) {
+        // Draw Gravity Radius
+        this.ctx.beginPath();
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        this.ctx.lineWidth = 1;
+        this.ctx.arc(planet.x, planet.y, planet.gravityRadius, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+
         this.ctx.fillStyle = planet.color;
         this.ctx.beginPath();
         this.ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);

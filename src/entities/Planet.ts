@@ -5,7 +5,8 @@ export const PlanetType = {
     Ocean: 'ocean',
     Ice: 'ice',
     Desert: 'desert',
-    GasGiant: 'gas_giant'
+    GasGiant: 'gas_giant',
+    BlackHole: 'black_hole'
 } as const;
 
 export type PlanetType = typeof PlanetType[keyof typeof PlanetType];
@@ -48,6 +49,10 @@ export class Planet {
             case PlanetType.GasGiant:
                 this.color = '#FF4500'; // Placeholder
                 this.mass *= 2; // Gas giants are heavier
+                break;
+            case PlanetType.BlackHole:
+                this.color = '#000000';
+                this.mass *= 4; // Massive
                 break;
             default:
                 this.color = '#FFFFFF';

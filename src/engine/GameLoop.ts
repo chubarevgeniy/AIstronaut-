@@ -1,12 +1,14 @@
 import { Ship } from '../entities/Ship';
 import { PhysicsSystem } from '../systems/Physics';
 import { Planet, PlanetType } from '../entities/Planet';
+import { FuelItem } from '../entities/FuelItem';
 import { LevelGenerator } from '../systems/LevelGenerator';
+import { GameConfig } from './GameConfig';
 import { InputHandler } from '../systems/Input';
 import { Renderer } from '../systems/Renderer';
 import { GameState, GameMode } from './GameState';
 import { ParticleSystem } from '../systems/Particles';
-import { AudioController } from '../systems/AudioController';
+import { AudioController, EngineType, MusicType } from '../systems/AudioController';
 
 export class GameLoop {
     private canvas: HTMLCanvasElement;
@@ -22,6 +24,7 @@ export class GameLoop {
     private renderer: Renderer;
     private particleSystem: ParticleSystem;
     private planets: Planet[] = [];
+    private items: FuelItem[] = [];
 
     private state: GameState = GameState.Start;
     private mode: GameMode = GameMode.Survival;
@@ -82,6 +85,7 @@ export class GameLoop {
         }
 
         this.planets = [];
+        this.items = [];
         this.particleSystem.particles = [];
         this.levelGenerator.reset();
 
@@ -147,6 +151,10 @@ export class GameLoop {
         // Run physics
         const collision = this.physics.update(this.ship, this.planets, deltaTime);
 
+        // Check for fuel items
+        this.physics.checkItemCollisions(this.ship, this.items);
+        this.items = this.items.filter(item => !item.collected);
+
         // Check for fuel empty event
         if (prevFuel > 0 && this.ship.fuel <= 0 && this.mode === GameMode.Survival) {
             if (this.onFuelEmpty) {
@@ -193,11 +201,22 @@ export class GameLoop {
             );
         }
         this.particleSystem.update(deltaTime);
-        this.audio.update(this.ship.isThrusting && this.ship.fuel > 0);
+
+        // Audio Update
+        // Sync Config
+        this.audio.setEngineType(GameConfig.engineType as EngineType);
+        this.audio.setMusicType(GameConfig.musicType as MusicType);
+
+        const isLowFuel = this.ship.maxFuel !== Infinity && this.ship.fuel < (this.ship.maxFuel * 0.2);
+        this.audio.update(this.ship.isThrusting && this.ship.fuel > 0, isLowFuel);
 
         // Generate planets
         const newPlanets = this.levelGenerator.generate(this.ship.x, this.ship.y);
         this.planets.push(...newPlanets);
+
+        // Generate items
+        const newItems = this.levelGenerator.generateItems(this.ship.y);
+        this.items.push(...newItems);
 
         // Cleanup old planets (distance based)
         const cleanupRadius = 3000;
@@ -207,6 +226,15 @@ export class GameLoop {
             const dx = p.x - this.ship.x;
             const dy = p.y - this.ship.y;
             return dx * dx + dy * dy < cleanupRadiusSq;
+        });
+
+        // Cleanup old items
+        this.items = this.items.filter(item => {
+            const dy = item.y - this.ship.y;
+            // Only remove if far behind (ship.y is less than item.y if moving up)
+            // Wait, ship.y is negative. Up is negative.
+            // If item.y > ship.y + 2000, it's below the ship.
+            return Math.abs(dy) < 3000;
         });
 
         // Also cleanup visited chunks to allow regeneration
@@ -222,7 +250,7 @@ export class GameLoop {
     }
 
     private draw() {
-        this.renderer.render(this.ship, this.planets, this.particleSystem.particles);
+        this.renderer.render(this.ship, this.planets, this.items, this.particleSystem.particles);
     }
 
     private notifyState() {

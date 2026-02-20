@@ -1,5 +1,6 @@
 import { Ship } from '../entities/Ship';
-import { Planet } from '../entities/Planet';
+import { Planet, PlanetType } from '../entities/Planet';
+import { FuelItem } from '../entities/FuelItem';
 import type { Particle } from './Particles';
 
 interface Star {
@@ -40,7 +41,7 @@ export class Renderer {
         }
     }
 
-    render(ship: Ship, planets: Planet[], particles: Particle[]) {
+    render(ship: Ship, planets: Planet[], items: FuelItem[], particles: Particle[]) {
         // Clear screen
         this.ctx.fillStyle = '#000000';
         this.ctx.fillRect(0, 0, this.width, this.height);
@@ -59,6 +60,13 @@ export class Renderer {
         // Draw Planets
         for (const planet of planets) {
             this.drawPlanet(planet);
+        }
+
+        // Draw Items
+        for (const item of items) {
+            if (!item.collected) {
+                this.drawItem(item);
+            }
         }
 
         // Draw Particles
@@ -136,6 +144,27 @@ export class Renderer {
         this.ctx.globalAlpha = 1.0;
     }
 
+    private drawItem(item: FuelItem) {
+        // Items are drawn in world space, the transform is already applied in render()
+        // So we just draw at item.x, item.y
+
+        this.ctx.fillStyle = '#00FF00';
+        this.ctx.beginPath();
+        this.ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // Pulsing glow
+        const time = Date.now() / 200;
+        this.ctx.strokeStyle = `rgba(0, 255, 0, ${Math.abs(Math.sin(time))})`;
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+
+        // Label
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = '10px "JetBrains Mono"';
+        this.ctx.fillText("FUEL", item.x - 12, item.y - 15);
+    }
+
     private drawPlanet(planet: Planet) {
         // Draw Gravity Radius
         this.ctx.beginPath();
@@ -145,6 +174,29 @@ export class Renderer {
         this.ctx.arc(planet.x, planet.y, planet.gravityRadius, 0, Math.PI * 2);
         this.ctx.stroke();
         this.ctx.setLineDash([]);
+
+        if (planet.type === PlanetType.BlackHole) {
+            // Accretion Disk (Outer Glow)
+            const gradient = this.ctx.createRadialGradient(planet.x, planet.y, planet.radius, planet.x, planet.y, planet.radius * 2.5);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(100, 100, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            this.ctx.fillStyle = gradient;
+            this.ctx.beginPath();
+            this.ctx.arc(planet.x, planet.y, planet.radius * 2.5, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Event Horizon
+            this.ctx.fillStyle = '#000000';
+            this.ctx.strokeStyle = '#FFFFFF';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.stroke();
+            return;
+        }
 
         this.ctx.fillStyle = planet.color;
         this.ctx.beginPath();

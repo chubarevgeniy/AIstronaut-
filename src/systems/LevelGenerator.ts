@@ -1,9 +1,37 @@
 
 import { Planet, PlanetType } from '../entities/Planet';
+import { FuelItem } from '../entities/FuelItem';
 import { GameConfig } from '../engine/GameConfig';
 
 export class LevelGenerator {
     private visitedChunks: Set<string> = new Set();
+    private lastFuelSpawnY: number = 0;
+    private spawnInterval: number = 10000; // 100 LY
+
+    generateItems(shipY: number): FuelItem[] {
+        const items: FuelItem[] = [];
+
+        // shipY is negative as we go up.
+        if (shipY < this.lastFuelSpawnY - this.spawnInterval) {
+            this.lastFuelSpawnY -= this.spawnInterval;
+
+            // 90% chance for at least one
+            if (Math.random() < 0.9) {
+                const y = this.lastFuelSpawnY - Math.random() * 1000;
+                const x = (Math.random() - 0.5) * GameConfig.chunkSize * 3; // Wide spread
+
+                items.push(new FuelItem(x, y));
+
+                // 50% chance for a second one
+                if (Math.random() < 0.5) {
+                    const y2 = this.lastFuelSpawnY - Math.random() * 1000;
+                    const x2 = (Math.random() - 0.5) * GameConfig.chunkSize * 3;
+                    items.push(new FuelItem(x2, y2));
+                }
+            }
+        }
+        return items;
+    }
 
     generate(shipX: number, shipY: number): Planet[] {
         const newPlanets: Planet[] = [];
@@ -68,5 +96,6 @@ export class LevelGenerator {
 
     reset() {
         this.visitedChunks.clear();
+        this.lastFuelSpawnY = 0;
     }
 }

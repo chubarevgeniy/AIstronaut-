@@ -26,6 +26,7 @@ export class GameLoop {
     private state: GameState = GameState.Start;
     private mode: GameMode = GameMode.Survival;
     public onStateChange: ((state: GameState, score: number) => void) | null = null;
+    public onFuelEmpty: (() => void) | null = null;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -140,8 +141,17 @@ export class GameLoop {
         // Update input state
         this.ship.isThrusting = this.input.isPressed;
 
+        const prevFuel = this.ship.fuel;
+
         // Run physics
         const collision = this.physics.update(this.ship, this.planets, deltaTime);
+
+        // Check for fuel empty event
+        if (prevFuel > 0 && this.ship.fuel <= 0 && this.mode === GameMode.Survival) {
+            if (this.onFuelEmpty) {
+                this.onFuelEmpty();
+            }
+        }
 
         // Check Game Over conditions
         if (collision) {
@@ -225,6 +235,56 @@ export class GameLoop {
         this.canvas.height = height;
         if (this.renderer) {
             this.renderer.resize(width, height);
+        }
+    }
+
+    eject() {
+        if (this.ship.hasEjected) return;
+
+        this.ship.hasEjected = true;
+
+        // Find nearest planet
+        let nearestPlanet: Planet | null = null;
+        let minSurfaceDist = Infinity;
+
+        for (const planet of this.planets) {
+            const dx = this.ship.x - planet.x;
+            const dy = this.ship.y - planet.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const surfaceDist = dist - planet.radius;
+
+            if (surfaceDist < minSurfaceDist) {
+                minSurfaceDist = surfaceDist;
+                nearestPlanet = planet;
+            }
+        }
+
+        if (nearestPlanet) {
+            const dx = this.ship.x - nearestPlanet.x;
+            const dy = this.ship.y - nearestPlanet.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Strong impulse away from planet
+            const force = 400; // Strong push
+            if (dist > 0.1) {
+                this.ship.vx += (dx / dist) * force;
+                this.ship.vy += (dy / dist) * force;
+            }
+
+            // Visual effect
+            this.particleSystem.emit(
+                this.ship.x,
+                this.ship.y,
+                20,
+                200,
+                0, // random dir handled by spread if needed, or implement omni-emit
+                Math.PI * 2,
+                '#FF0000',
+                1.0
+            );
+        } else {
+            // Fallback: push up
+             this.ship.vy -= 400;
         }
     }
 }

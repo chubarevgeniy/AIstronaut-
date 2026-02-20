@@ -2,12 +2,14 @@ import React, { useRef, useEffect, useState } from 'react';
 import { GameLoop } from '../engine/GameLoop';
 import { GameState, GameMode } from '../engine/GameState';
 import { UI } from './UI';
+import { DebugMenu } from './DebugMenu';
 
 export const GameCanvas: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const gameLoopRef = useRef<GameLoop | null>(null);
     const [gameState, setGameState] = useState<GameState>(GameState.Start);
     const [score, setScore] = useState<number>(0);
+    const [gameMode, setGameMode] = useState<GameMode>(GameMode.Survival);
     const [isMuted, setIsMuted] = useState<boolean>(false);
 
     useEffect(() => {
@@ -53,6 +55,9 @@ export const GameCanvas: React.FC = () => {
 
     const handleStart = (mode: GameMode) => {
         if (gameLoopRef.current) {
+            setGameMode(mode);
+            // Explicitly resume audio context on user gesture
+            gameLoopRef.current.audio.resume();
             gameLoopRef.current.startGame(mode);
         }
     };
@@ -81,6 +86,7 @@ export const GameCanvas: React.FC = () => {
             />
             <UI
                 gameState={gameState}
+                gameMode={gameMode}
                 score={score}
                 onStart={handleStart}
                 onPause={handlePause}
@@ -88,6 +94,7 @@ export const GameCanvas: React.FC = () => {
                 isMuted={isMuted}
                 onToggleMute={handleToggleMute}
             />
+            <DebugMenu />
         </div>
     );
 };

@@ -39,20 +39,15 @@ jobs:
           keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
           mv debug.keystore godot_project/debug.keystore
 
-      - name: Configure Keystore in Editor Settings
+      - name: Validate Export Environment
         run: |
-          # We need to set the keystore path in editor settings, but since we are running headless export,
-          # we can pass it via environment variables or modify the export preset if possible?
-          # Actually, Godot's Android export requires the path to be set in Editor Settings -> Export -> Android.
-          # The barichello/godot-ci image might not have this set up by default for a custom keystore.
+          chmod +x godot_project/scripts/validate_export_env.sh
+          ./godot_project/scripts/validate_export_env.sh
 
-          # Workaround: Create editor_settings-4.tres
-          mkdir -p ~/.config/godot/
-          echo '[gd_resource type="EditorSettings" format=3]' > ~/.config/godot/editor_settings-4.tres
-          echo '[resource]' >> ~/.config/godot/editor_settings-4.tres
-          echo "export/android/debug_keystore = \"${GITHUB_WORKSPACE}/godot_project/debug.keystore\"" >> ~/.config/godot/editor_settings-4.tres
-          echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ~/.config/godot/editor_settings-4.tres
-          echo 'export/android/debug_keystore_pass = "android"' >> ~/.config/godot/editor_settings-4.tres
+      - name: Configure Editor Settings for Android
+        run: |
+          chmod +x godot_project/scripts/generate_editor_settings.sh
+          ./godot_project/scripts/generate_editor_settings.sh "${GITHUB_WORKSPACE}/godot_project/debug.keystore" "androiddebugkey" "android"
 
       - name: Build
         run: |

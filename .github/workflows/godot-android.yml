@@ -37,14 +37,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Fix SDK Permissions
-        run: |
-          # Ensure the runner user has full access to the Android SDK
-          # This might be needed if installing components
-          sudo chmod -R 777 $ANDROID_HOME || echo "sudo failed, trying direct chmod" && chmod -R 777 $ANDROID_HOME || true
-          # Also fix the keystore directory just in case
-          chmod -R 777 ~/.android || true
-
       - name: Update Android SDK
         run: |
           # Update SDK to match Godot 4.6 requirements (API 34/35)

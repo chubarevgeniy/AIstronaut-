@@ -15,9 +15,9 @@ jobs:
   export-android:
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.2.1
+      image: barichello/godot-ci:4.6.1
     env:
-      GODOT_VERSION: 4.2.1
+      GODOT_VERSION: 4.6.1
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -31,19 +31,21 @@ else
 fi
 
 echo "=== APKSIGNER CHECK ==="
-# Find apksigner in build-tools
-APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner | head -n 1)
-if [ -n "$APKSIGNER" ]; then
-    echo "Found apksigner at: $APKSIGNER"
-    ls -l $APKSIGNER
-else
-    echo "WARNING: apksigner not found in build-tools!"
-fi
+# Find all apksigners
+find $ANDROID_HOME/build-tools -name apksigner -ls
 
 echo "=== KEYSTORE ==="
-ls -la ~/.android/debug.keystore
-# Check keystore validity (requires password)
-keytool -list -v -keystore ~/.android/debug.keystore -storepass android || echo "Keystore verification failed!"
+# Check the keystore in the project directory (new location)
+KEYSTORE_PATH="godot_project/debug.keystore"
+if [ -f "$KEYSTORE_PATH" ]; then
+    echo "Found keystore at: $KEYSTORE_PATH"
+    ls -l $KEYSTORE_PATH
+    # Check keystore validity (requires password)
+    keytool -list -v -keystore $KEYSTORE_PATH -storepass android || echo "Keystore verification failed!"
+else
+    echo "ERROR: Keystore not found at $KEYSTORE_PATH"
+    ls -R godot_project | grep keystore || echo "No keystore found in godot_project"
+fi
 
 echo "=== EDITOR SETTINGS ==="
 cat ~/.config/godot/editor_settings-4.tres

@@ -4,7 +4,8 @@
 mkdir -p ~/.config/godot/
 
 # Resolve absolute path to keystore
-KEYSTORE_PATH="$HOME/.android/debug.keystore"
+# Using workspace path now as generated in workflow
+KEYSTORE_PATH="$GITHUB_WORKSPACE/godot_project/debug.keystore"
 
 # Resolve JAVA_HOME
 if [ -z "$JAVA_HOME" ]; then

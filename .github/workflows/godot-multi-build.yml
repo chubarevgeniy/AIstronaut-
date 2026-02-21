@@ -11,21 +11,51 @@ on:
       - master
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.6.1
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Godot Multi Builder
-        id: builds
-        uses: croconut/godot-multi-builder@v1
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
         with:
-          names: "Android"
-          path-to-game: "godot_project"
-          debug-mode: "true"
+          version: 4.6.1
+          include-templates: true
+          use-dotnet: false
+
+      - name: Setup Android Keystore
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype jks
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Update Android SDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Configure Editor Settings
+        run: |
+          chmod +x godot_project/scripts/generate_editor_settings.sh
+          # Pass JAVA_HOME explicitly
+          export JAVA_HOME=$JAVA_HOME
+          ./godot_project/scripts/generate_editor_settings.sh
+
+      - name: Export Android
+        run: |
+          $ANDROID_HOME/platform-tools/adb kill-server || true
+          cd godot_project
+          mkdir -p builds
+          godot --headless --verbose --export-debug "Android" builds/android.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: godot-builds
-          path: godot_project/builds/builds.zip
+          name: godot-android-build
+          path: godot_project/builds/android.apk

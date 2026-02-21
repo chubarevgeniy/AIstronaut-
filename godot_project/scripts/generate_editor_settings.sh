@@ -23,7 +23,6 @@ cat <<EOF > ~/.config/godot/editor_settings-4.tres
 
 [resource]
 export/android/android_sdk_path = "/usr/lib/android-sdk"
-export/android/cmdline_tools_path = "/usr/lib/android-sdk/cmdline-tools/latest"
 export/android/java_sdk_path = "$JAVA_HOME_PATH"
 export/android/debug_keystore = "$KEYSTORE_PATH"
 export/android/debug_keystore_user = "androiddebugkey"

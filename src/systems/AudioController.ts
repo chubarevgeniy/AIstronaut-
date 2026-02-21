@@ -31,6 +31,10 @@ export class AudioController {
     private currentEngineType: EngineType = EngineType.Standard;
     private currentMusicType: MusicType = MusicType.None;
 
+    private spaceVolume: number = 1.0;
+    private musicVolume: number = 1.0;
+    private engineVolume: number = 1.0;
+
     // Music
     private nextNoteTime: number = 0;
     private musicGain: GainNode | null = null;
@@ -73,6 +77,25 @@ export class AudioController {
         if (this.currentMusicType === type) return;
         this.currentMusicType = type;
         // Music logic will handle the change on next beat
+    }
+
+    setSpaceVolume(v: number) {
+        this.spaceVolume = Math.max(0, Math.min(1, v));
+        if (this.ambienceGain && !this.isMuted) {
+            this.ambienceGain.gain.setTargetAtTime(0.05 * this.spaceVolume, this.ctx?.currentTime || 0, 0.1);
+        }
+    }
+
+    setMusicVolume(v: number) {
+        this.musicVolume = Math.max(0, Math.min(1, v));
+        if (this.musicGain && !this.isMuted) {
+            this.musicGain.gain.setTargetAtTime(0.1 * this.musicVolume, this.ctx?.currentTime || 0, 0.1);
+        }
+    }
+
+    setEngineVolume(v: number) {
+        this.engineVolume = Math.max(0, Math.min(1, v));
+        // Engine volume is dynamic in update(), so we don't set it here directly unless idling
     }
 
     private setupEngine() {
@@ -201,7 +224,7 @@ export class AudioController {
 
         // Engine Sound Logic
         if (isThrusting) {
-            this.engineGain.gain.setTargetAtTime(0.2, this.ctx.currentTime, 0.1);
+            this.engineGain.gain.setTargetAtTime(0.2 * this.engineVolume, this.ctx.currentTime, 0.1);
 
             // Dynamic pitch shifting based on type
             const baseFreq = this.getEngineBaseFreq();
@@ -322,8 +345,8 @@ export class AudioController {
             if (this.engineGain) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
             if (this.musicGain) this.musicGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
         } else {
-            if (this.ambienceGain) this.ambienceGain.gain.setTargetAtTime(0.05, this.ctx.currentTime, 0.1);
-            if (this.musicGain) this.musicGain.gain.setTargetAtTime(0.1, this.ctx.currentTime, 0.1);
+            if (this.ambienceGain) this.ambienceGain.gain.setTargetAtTime(0.05 * this.spaceVolume, this.ctx.currentTime, 0.1);
+            if (this.musicGain) this.musicGain.gain.setTargetAtTime(0.1 * this.musicVolume, this.ctx.currentTime, 0.1);
         }
     }
 }

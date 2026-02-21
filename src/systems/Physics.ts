@@ -23,7 +23,7 @@ export class PhysicsSystem {
         }
     }
 
-    update(ship: Ship, planets: Planet[], deltaTime: number): boolean {
+    update(ship: Ship, planets: Planet[], items: FuelItem[], deltaTime: number): boolean {
         // Calculate gravity from planets
         let gx = 0;
         let gy = 0;
@@ -72,35 +72,53 @@ export class PhysicsSystem {
 
         // Thrust application
         if (ship.isThrusting && ship.fuel > 0) {
-            // Find nearest planet for repulsion
-            let nearestPlanet: Planet | null = null;
-            let minDistSq = Infinity;
+            // Find nearest object (Planet or FuelItem) for repulsion/attraction
+            let nearestObj: { x: number, y: number, type: 'planet' | 'fuel' } | null = null;
             let minSurfaceDist = Infinity;
 
+            // Check Planets
             for (const planet of planets) {
                 const dx = ship.x - planet.x;
                 const dy = ship.y - planet.y;
-                const distSq = dx * dx + dy * dy;
-                const dist = Math.sqrt(distSq);
+                const dist = Math.sqrt(dx * dx + dy * dy);
                 const surfaceDist = dist - planet.radius;
 
                 if (surfaceDist < minSurfaceDist) {
                     minSurfaceDist = surfaceDist;
-                    nearestPlanet = planet;
-                    minDistSq = distSq;
+                    nearestObj = { x: planet.x, y: planet.y, type: 'planet' };
                 }
             }
 
-            // Repulsive force logic (Arcade style)
-            // Push away from the nearest planet instead of forward acceleration
-            if (nearestPlanet && minDistSq < 4000000) { // 2000px range
-                const dx = ship.x - nearestPlanet.x;
-                const dy = ship.y - nearestPlanet.y;
-                const dist = Math.sqrt(minDistSq);
+            // Check Fuel Items
+            for (const item of items) {
+                if (item.collected) continue;
+                const dx = ship.x - item.x;
+                const dy = ship.y - item.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const surfaceDist = dist - item.radius;
+
+                if (surfaceDist < minSurfaceDist) {
+                    minSurfaceDist = surfaceDist;
+                    nearestObj = { x: item.x, y: item.y, type: 'fuel' };
+                }
+            }
+
+            // Apply Force
+            if (nearestObj && minSurfaceDist < 2000) {
+                const dx = ship.x - nearestObj.x;
+                const dy = ship.y - nearestObj.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
 
                 if (dist > 1) {
-                    ship.vx += (dx / dist) * GameConfig.thrustPower * deltaTime;
-                    ship.vy += (dy / dist) * GameConfig.thrustPower * deltaTime;
+                    if (nearestObj.type === 'fuel') {
+                         // PULL TOWARDS FUEL
+                        ship.vx -= (dx / dist) * GameConfig.thrustPower * deltaTime;
+                        ship.vy -= (dy / dist) * GameConfig.thrustPower * deltaTime;
+                    } else {
+                        // PUSH AWAY FROM PLANET
+                        ship.vx += (dx / dist) * GameConfig.thrustPower * deltaTime;
+                        ship.vy += (dy / dist) * GameConfig.thrustPower * deltaTime;
+                    }
                 }
             } else {
                 // Fallback: standard thrust if in deep space

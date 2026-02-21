@@ -149,7 +149,7 @@ export class GameLoop {
         const prevFuel = this.ship.fuel;
 
         // Run physics
-        const collision = this.physics.update(this.ship, this.planets, deltaTime);
+        const collision = this.physics.update(this.ship, this.planets, this.items, deltaTime);
 
         // Check for fuel items
         this.physics.checkItemCollisions(this.ship, this.items);

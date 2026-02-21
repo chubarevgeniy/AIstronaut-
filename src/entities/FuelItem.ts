@@ -1,7 +1,7 @@
 export class FuelItem {
     x: number;
     y: number;
-    radius: number = 10;
+    radius: number = 30;
     collected: boolean = false;
     amount: number = 50; // Amount of fuel restored
 

@@ -1,0 +1,58 @@
+name: Godot Android Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - godot-port*
+  pull_request:
+    paths:
+      - 'godot_project/**'
+      - '.github/workflows/godot-android.yml'
+
+jobs:
+  export-android:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.2.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+
+      - name: Setup Android Keystore
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+          mv debug.keystore godot_project/debug.keystore
+
+      - name: Configure Keystore in Editor Settings
+        run: |
+          # We need to set the keystore path in editor settings, but since we are running headless export,
+          # we can pass it via environment variables or modify the export preset if possible?
+          # Actually, Godot's Android export requires the path to be set in Editor Settings -> Export -> Android.
+          # The barichello/godot-ci image might not have this set up by default for a custom keystore.
+
+          # Workaround: Create editor_settings-4.tres
+          mkdir -p ~/.config/godot/
+          echo '[gd_resource type="EditorSettings" format=3]' > ~/.config/godot/editor_settings-4.tres
+          echo '[resource]' >> ~/.config/godot/editor_settings-4.tres
+          echo 'export/android/debug_keystore = "/github/workspace/godot_project/debug.keystore"' >> ~/.config/godot/editor_settings-4.tres
+          echo 'export/android/debug_keystore_user = "androiddebugkey"' >> ~/.config/godot/editor_settings-4.tres
+          echo 'export/android/debug_keystore_pass = "android"' >> ~/.config/godot/editor_settings-4.tres
+
+      - name: Build
+        run: |
+          cd godot_project
+          mkdir -p build/android
+          godot --headless --verbose --export-debug "Android" build/android/aistronaut-debug.apk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-apk
+          path: godot_project/build/android/aistronaut-debug.apk

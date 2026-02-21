@@ -1,12 +1,15 @@
 class_name GameConfig
+# Auto-generated from game_config.json
 
 const GRAVITY_CONSTANT = 300.0
 const GRAVITY_RADIUS_SCALE = 3.0
 const THRUST_POWER = 300.0
 const MIN_PLANET_RADIUS = 15.0
 const MAX_PLANET_RADIUS = 50.0
-const CHUNK_SIZE = 600.0
-const FUEL_SPAWN_INTERVAL = 10000.0
-const SHIP_COLLISION_RADIUS = 5.0
 const MIN_PLANETS_PER_CHUNK = 2
 const MAX_PLANETS_PER_CHUNK = 5
+const CHUNK_SIZE = 600.0
+const SHIP_COLLISION_RADIUS = 5.0
+const FUEL_SPAWN_INTERVAL = 10000.0
+const ENGINE_VOLUME = 0.3
+const MUSIC_VOLUME = 2.5

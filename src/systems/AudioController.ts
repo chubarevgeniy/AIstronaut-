@@ -1,4 +1,6 @@
 
+import { GameConfig } from '../engine/GameConfig';
+
 export const EngineType = {
     Standard: 0,
     Retro: 1,
@@ -28,12 +30,12 @@ export class AudioController {
     private isMuted: boolean = false;
     private isInitialized: boolean = false;
 
-    private currentEngineType: EngineType = EngineType.Standard;
-    private currentMusicType: MusicType = MusicType.None;
+    private currentEngineType: EngineType = GameConfig.engineType as EngineType;
+    private currentMusicType: MusicType = GameConfig.musicType as MusicType;
 
     private spaceVolume: number = 1.0;
-    private musicVolume: number = 1.0;
-    private engineVolume: number = 1.0;
+    private musicVolume: number = GameConfig.musicVolume;
+    private engineVolume: number = GameConfig.engineVolume;
 
     // Music
     private nextNoteTime: number = 0;

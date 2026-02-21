@@ -6,7 +6,7 @@ import { GameConfig } from '../engine/GameConfig';
 export class LevelGenerator {
     private visitedChunks: Set<string> = new Set();
     private lastFuelSpawnY: number = 0;
-    private spawnInterval: number = 10000; // 100 LY
+    private spawnInterval: number = GameConfig.fuelSpawnInterval;
 
     generateItems(shipY: number): FuelItem[] {
         const items: FuelItem[] = [];

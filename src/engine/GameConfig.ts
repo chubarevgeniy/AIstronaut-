@@ -1,6 +1,7 @@
+// Auto-generated from game_config.json
 export const GameConfig = {
     gravityConstant: 300,
-    gravityRadiusScale: 3.0,
+    gravityRadiusScale: 3,
     thrustPower: 300,
     minPlanetRadius: 15,
     maxPlanetRadius: 50,
@@ -8,6 +9,9 @@ export const GameConfig = {
     maxPlanetsPerChunk: 5,
     chunkSize: 600,
     shipCollisionRadius: 5,
-    engineType: 0,
-    musicType: 0,
+    fuelSpawnInterval: 10000,
+    engineType: 2,
+    musicType: 2,
+    engineVolume: 0.3,
+    musicVolume: 2.5,
 };

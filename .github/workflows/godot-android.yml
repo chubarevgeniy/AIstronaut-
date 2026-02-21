@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install System Dependencies
+        run: |
+          apt-get update
+          apt-get install -y fontconfig libfontconfig1 unzip
+
       - name: Setup Godot
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates/
@@ -37,7 +42,7 @@ jobs:
       - name: Setup Android Keystore
         run: |
           # Generate keystore in the project root so it can be referenced relatively
-          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype jks
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
 
       - name: Setup Environment Variables
         run: |
@@ -60,9 +65,9 @@ jobs:
 
       - name: Update Android SDK
         run: |
-          # Update SDK to match Godot 4.6 requirements (API 34/35)
+          # Update SDK to match Godot 4.6.1 requirements (API 35)
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Configure Editor Settings
         run: |
@@ -70,6 +75,11 @@ jobs:
           # Pass JAVA_HOME explicitly just in case
           export JAVA_HOME=$JAVA_HOME
           ./godot_project/scripts/generate_editor_settings.sh
+
+      - name: Install Android Build Template
+        run: |
+          mkdir -p godot_project/android/build
+          unzip ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d godot_project/android/build
 
       - name: Run Diagnostics & Verify Tools
         if: always()

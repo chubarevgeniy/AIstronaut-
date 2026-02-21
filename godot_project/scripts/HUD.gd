@@ -7,7 +7,17 @@ var ship: Node2D = null
 @onready var fuel_label = $Control/FuelLabel
 @onready var pause_menu = $Control/PauseMenu
 
+# Dynamic child for drawing
+var drawer: Control = null
+
 func _ready():
+	# Create and add the drawer
+	drawer = Control.new()
+	drawer.set_script(load("res://scripts/HUDDrawer.gd"))
+	drawer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	drawer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	$Control.add_child(drawer)
+
 	# Assuming Sliders are in the PauseMenu
 	if pause_menu:
 		var master = pause_menu.find_child("MasterSlider", true, false)
@@ -27,9 +37,11 @@ func _unhandled_input(event):
 		pause_menu.visible = tree.paused
 
 func _process(delta):
-	queue_redraw() # Redraw indicator every frame
-
 	if not is_instance_valid(ship): return
+
+	# Pass ship ref to drawer
+	if drawer:
+		drawer.ship = ship
 
 	if alt_label:
 		alt_label.text = "ALT: %d LY" % Global.score
@@ -39,31 +51,3 @@ func _process(delta):
 			fuel_label.text = "FUEL: INF"
 		else:
 			fuel_label.text = "FUEL: %d%%" % int((ship.fuel / ship.max_fuel) * 100)
-
-func _draw():
-	if not is_instance_valid(ship): return
-
-	# Draw Indicator
-	# Fix: Use surface distance (dist - radius)
-	var planets = get_tree().get_nodes_in_group("planets")
-	var nearest = null
-	var min_surface_dist = INF
-
-	for p in planets:
-		var dist = ship.global_position.distance_to(p.global_position)
-		var surface_dist = dist - p.radius
-		if surface_dist < min_surface_dist:
-			min_surface_dist = surface_dist
-			nearest = p
-
-	# Center of screen (Player position relative to Camera)
-	var center = get_viewport().get_visible_rect().size / 2
-
-	if nearest and min_surface_dist > 10.0 and min_surface_dist < 2000.0:
-		var dir = (nearest.global_position - ship.global_position).normalized()
-		var offset = dir * 60.0 # Indicator radius
-
-		draw_circle(center + offset, 4.0, Color.RED)
-
-		# Optional: Line to it
-		# draw_line(center, center + offset, Color(1, 0, 0, 0.3), 1.0)

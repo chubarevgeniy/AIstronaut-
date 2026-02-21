@@ -1,0 +1,14 @@
+[gd_scene load_steps=6 format=3 uid="uid://main"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://ship" path="res://scenes/Ship.tscn" id="2_ship"]
+[ext_resource type="PackedScene" uid="uid://planet" path="res://scenes/Planet.tscn" id="3_planet"]
+[ext_resource type="PackedScene" uid="uid://fuel" path="res://scenes/FuelItem.tscn" id="4_fuel"]
+[ext_resource type="PackedScene" uid="uid://hud" path="res://scenes/HUD.tscn" id="5_hud"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+ship_scene = ExtResource("2_ship")
+planet_scene = ExtResource("3_planet")
+fuel_scene = ExtResource("4_fuel")
+hud_scene = ExtResource("5_hud")

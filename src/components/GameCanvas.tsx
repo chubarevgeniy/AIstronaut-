@@ -139,6 +139,14 @@ export const GameCanvas: React.FC = () => {
         }
     };
 
+    const handleVolumeChange = (type: 'space' | 'music' | 'engine', value: number) => {
+        if (gameLoopRef.current) {
+            if (type === 'space') gameLoopRef.current.audio.setSpaceVolume(value);
+            if (type === 'music') gameLoopRef.current.audio.setMusicVolume(value);
+            if (type === 'engine') gameLoopRef.current.audio.setEngineVolume(value);
+        }
+    };
+
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <canvas
@@ -160,6 +168,7 @@ export const GameCanvas: React.FC = () => {
                 isFuelEmpty={isFuelEmpty}
                 hasEjected={hasEjected}
                 onEject={handleEject}
+                onVolumeChange={handleVolumeChange}
             />
             <DebugMenu gameState={gameState} />
         </div>

@@ -16,6 +16,7 @@ interface UIProps {
     isFuelEmpty?: boolean;
     hasEjected?: boolean;
     onEject?: () => void;
+    onVolumeChange?: (type: 'space' | 'music' | 'engine', value: number) => void;
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -58,6 +59,23 @@ const buttonGroupStyle: React.CSSProperties = {
     marginTop: '2rem'
 };
 
+const sliderContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    width: '80%',
+    maxWidth: '250px',
+    marginTop: '1rem',
+    textAlign: 'left'
+};
+
+const sliderLabelStyle: React.CSSProperties = {
+    fontSize: '0.8rem',
+    color: '#aaa',
+    display: 'flex',
+    justifyContent: 'space-between'
+};
+
 const infoTextStyle: React.CSSProperties = {
     fontSize: '0.9rem',
     color: '#aaa',
@@ -94,7 +112,7 @@ const MuteButton: React.FC<{ isMuted: boolean; onToggleMute: () => void }> = ({ 
     </button>
 );
 
-export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScores, onStart, onPause, onResume, onExit, isMuted, onToggleMute, onResetHighScore, isFuelEmpty, hasEjected, onEject }) => {
+export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScores, onStart, onPause, onResume, onExit, isMuted, onToggleMute, onResetHighScore, isFuelEmpty, hasEjected, onEject, onVolumeChange }) => {
     if (gameState === GameState.Playing) {
         return (
             <>
@@ -141,6 +159,29 @@ export const UI: React.FC<UIProps> = ({ gameState, gameMode, score, highScores, 
                     <div style={{...infoTextStyle, color: '#fff', fontSize: '1.2rem'}}>
                         ALTITUDE: {score} LY
                     </div>
+                    <div style={sliderContainerStyle}>
+                         <div style={sliderLabelStyle}>SPACE</div>
+                         <input
+                            type="range" min="0" max="1" step="0.1" defaultValue="1"
+                            onChange={(e) => onVolumeChange && onVolumeChange('space', parseFloat(e.target.value))}
+                            style={{width: '100%', accentColor: 'white'}}
+                         />
+
+                         <div style={sliderLabelStyle}>MUSIC</div>
+                         <input
+                            type="range" min="0" max="1" step="0.1" defaultValue="1"
+                            onChange={(e) => onVolumeChange && onVolumeChange('music', parseFloat(e.target.value))}
+                            style={{width: '100%', accentColor: 'white'}}
+                         />
+
+                         <div style={sliderLabelStyle}>ENGINE</div>
+                         <input
+                            type="range" min="0" max="1" step="0.1" defaultValue="1"
+                            onChange={(e) => onVolumeChange && onVolumeChange('engine', parseFloat(e.target.value))}
+                            style={{width: '100%', accentColor: 'white'}}
+                         />
+                    </div>
+
                     <div style={buttonGroupStyle}>
                         <button onClick={onResume}>RESUME</button>
                         <button onClick={() => onStart(GameMode.Survival)}>RESTART</button>

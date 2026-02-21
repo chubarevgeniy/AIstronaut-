@@ -93,12 +93,16 @@ export class Renderer {
         let nearest: Planet | null = null;
         let minDistSq = Infinity;
 
+        let minSurfaceDist = Infinity;
+
         for (const p of planets) {
             const dx = p.x - ship.x;
             const dy = p.y - ship.y;
-            const distSq = dx * dx + dy * dy;
-            if (distSq < minDistSq) {
-                minDistSq = distSq;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const surfaceDist = dist - p.radius;
+
+            if (surfaceDist < minSurfaceDist) {
+                minSurfaceDist = surfaceDist;
                 nearest = p;
             }
         }
@@ -106,10 +110,12 @@ export class Renderer {
         if (nearest) {
             const dx = nearest.x - ship.x;
             const dy = nearest.y - ship.y;
-            const dist = Math.sqrt(minDistSq);
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
             // Only draw if within a reasonable range (e.g. 2000px, same as thrust logic)
-            if (dist > 1 && dist < 2000) {
+            // Use surface distance check for logic consistency, or simple distance?
+            // The indicator visual should probably persist based on surface distance too.
+            if (minSurfaceDist < 2000) {
                 const indicatorDist = 40; // Distance from ship center
                 const ix = (dx / dist) * indicatorDist;
                 const iy = (dy / dist) * indicatorDist;

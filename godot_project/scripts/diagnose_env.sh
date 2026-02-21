@@ -3,17 +3,21 @@ set -e
 
 echo "=== DIAGNOSTICS START ==="
 echo "ANDROID_HOME: $ANDROID_HOME"
-ls -la $ANDROID_HOME
 echo "--- build-tools ---"
 ls -la $ANDROID_HOME/build-tools
-echo "--- cmdline-tools ---"
-ls -la $ANDROID_HOME/cmdline-tools
 echo "--- platform-tools ---"
 ls -la $ANDROID_HOME/platform-tools
+echo "--- platforms ---"
+ls -la $ANDROID_HOME/platforms
 
-echo "=== JAVA_HOME ==="
-echo "JAVA_HOME: $JAVA_HOME"
-ls -la $JAVA_HOME
+echo "=== JAVA ==="
+which java
+java -version
+echo "JAVA_HOME (env): $JAVA_HOME"
+# Find java home dynamically
+JAVA_BIN=$(readlink -f $(which java))
+JAVA_HOME_DETECTED=$(dirname $(dirname $JAVA_BIN))
+echo "JAVA_HOME (detected): $JAVA_HOME_DETECTED"
 
 echo "=== GODOT EXPORT TEMPLATES ==="
 ls -laR ~/.local/share/godot/export_templates/

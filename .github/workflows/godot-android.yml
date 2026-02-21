@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install System Dependencies
+        run: |
+          apt-get update
+          apt-get install -y fontconfig libfontconfig1
+
       - name: Setup Godot
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates/
@@ -37,7 +42,7 @@ jobs:
       - name: Setup Android Keystore
         run: |
           # Generate keystore in the project root so it can be referenced relatively
-          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype jks
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
 
       - name: Setup Environment Variables
         run: |

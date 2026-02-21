@@ -5,11 +5,12 @@
   "type": "module",
   "homepage": "https://chubarevgeniy.github.io/AIstronaut-/",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "npm run generate-config && vite",
+    "build": "npm run generate-config && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:android": "tsc -b && vite build && npx cap sync android"
+    "build:android": "npm run generate-config && tsc -b && vite build && npx cap sync android",
+    "generate-config": "node scripts/generate_config.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

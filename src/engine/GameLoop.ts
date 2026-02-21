@@ -96,7 +96,7 @@ export class GameLoop {
         // Let's try (150, -100)
         this.planets.push(new Planet(180, -100, 80, PlanetType.Ice));
         // Force generate around start
-        const initialPlanets = this.levelGenerator.generate(0, 0);
+        const initialPlanets = this.levelGenerator.generate(0, 0, this.planets);
         this.planets.push(...initialPlanets);
 
         // Initial render
@@ -211,7 +211,7 @@ export class GameLoop {
         this.audio.update(this.ship.isThrusting && this.ship.fuel > 0, isLowFuel);
 
         // Generate planets
-        const newPlanets = this.levelGenerator.generate(this.ship.x, this.ship.y);
+        const newPlanets = this.levelGenerator.generate(this.ship.x, this.ship.y, this.planets);
         this.planets.push(...newPlanets);
 
         // Generate items

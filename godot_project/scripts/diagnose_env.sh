@@ -2,8 +2,9 @@
 set -e
 
 echo "=== DIAGNOSTICS START ==="
+echo "USER: $(whoami) (UID: $(id -u))"
 echo "ANDROID_HOME: $ANDROID_HOME"
-ls -la $ANDROID_HOME
+ls -ld $ANDROID_HOME
 echo "--- build-tools ---"
 ls -la $ANDROID_HOME/build-tools
 echo "--- platform-tools ---"
@@ -29,8 +30,15 @@ else
     echo "WARNING: jarsigner not found in JAVA_HOME/bin"
 fi
 
-echo "=== GODOT EXPORT TEMPLATES ==="
-ls -laR ~/.local/share/godot/export_templates/
+echo "=== APKSIGNER CHECK ==="
+# Find apksigner in build-tools
+APKSIGNER=$(find $ANDROID_HOME/build-tools -name apksigner | head -n 1)
+if [ -n "$APKSIGNER" ]; then
+    echo "Found apksigner at: $APKSIGNER"
+    ls -l $APKSIGNER
+else
+    echo "WARNING: apksigner not found in build-tools!"
+fi
 
 echo "=== KEYSTORE ==="
 ls -la ~/.android/debug.keystore

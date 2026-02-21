@@ -79,6 +79,8 @@ jobs:
 
       - name: Build
         run: |
+          # Kill any lingering ADB server to prevent connection refused errors
+          $ANDROID_HOME/platform-tools/adb kill-server || true
           cd godot_project
           mkdir -p build/android
           # Run godot with explicit env vars for robustness

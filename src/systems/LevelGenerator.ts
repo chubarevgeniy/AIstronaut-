@@ -33,10 +33,11 @@ export class LevelGenerator {
         return items;
     }
 
-    generate(shipX: number, shipY: number): Planet[] {
+    generate(shipX: number, shipY: number, existingPlanets: Planet[] = []): Planet[] {
         const newPlanets: Planet[] = [];
         const currentChunkX = Math.floor(shipX / GameConfig.chunkSize);
         const currentChunkY = Math.floor(shipY / GameConfig.chunkSize);
+        const minGap = 100;
 
         // Check 3x3 grid around current chunk
         for (let dx = -1; dx <= 1; dx++) {
@@ -52,22 +53,54 @@ export class LevelGenerator {
                     const count = GameConfig.minPlanetsPerChunk + Math.floor(Math.random() * (GameConfig.maxPlanetsPerChunk - GameConfig.minPlanetsPerChunk));
 
                     for (let i = 0; i < count; i++) {
-                        // Position within chunk
-                        const x = (chunkX * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
-                        const y = (chunkY * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+                        let attempts = 0;
+                        let valid = false;
+                        let x = 0;
+                        let y = 0;
+                        let radius = 0;
 
-                        // Check collision with ship start (approx)
-                        if (chunkX === 0 && chunkY === 0) {
-                             if (Math.abs(x) < 350 && Math.abs(y) < 350) continue;
+                        while (!valid && attempts < 10) {
+                            attempts++;
+                            // Position within chunk
+                            x = (chunkX * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+                            y = (chunkY * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+
+                            radius = GameConfig.minPlanetRadius + Math.random() * (GameConfig.maxPlanetRadius - GameConfig.minPlanetRadius);
+
+                            // Check collision with ship start (approx)
+                            if (chunkX === 0 && chunkY === 0) {
+                                if (Math.abs(x) < 350 && Math.abs(y) < 350) continue;
+                            }
+
+                            valid = true;
+
+                            // Check collision with newPlanets
+                            for (const p of newPlanets) {
+                                const dist = Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2);
+                                if (dist < (radius + p.radius + minGap)) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+                            if (!valid) continue;
+
+                            // Check collision with existingPlanets
+                            for (const p of existingPlanets) {
+                                const dist = Math.sqrt((x - p.x) ** 2 + (y - p.y) ** 2);
+                                if (dist < (radius + p.radius + minGap)) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
                         }
 
-                        const radius = GameConfig.minPlanetRadius + Math.random() * (GameConfig.maxPlanetRadius - GameConfig.minPlanetRadius);
+                        if (valid) {
+                            // Random Type
+                            const types = Object.values(PlanetType) as PlanetType[];
+                            const type = types[Math.floor(Math.random() * types.length)];
 
-                        // Random Type
-                        const types = Object.values(PlanetType) as PlanetType[];
-                        const type = types[Math.floor(Math.random() * types.length)];
-
-                        newPlanets.push(new Planet(x, y, radius, type));
+                            newPlanets.push(new Planet(x, y, radius, type));
+                        }
                     }
                 }
             }

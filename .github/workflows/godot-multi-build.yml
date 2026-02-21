@@ -1,24 +1,22 @@
-name: Godot Android Build
+name: Godot Multi Build
 
 on:
   push:
     branches:
       - main
       - master
-      - godot-port*
   pull_request:
-    paths:
-      - 'godot_project/**'
-      - '.github/workflows/godot-android.yml'
+    branches:
+      - main
+      - master
 
 jobs:
-  export-android:
+  build-android:
     runs-on: ubuntu-latest
     env:
       GODOT_VERSION: 4.6.1
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
@@ -29,7 +27,6 @@ jobs:
 
       - name: Setup Android Keystore
         run: |
-          # Generate keystore in the project root so it can be referenced relatively
           keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore godot_project/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype jks
 
       - name: Set up Java 17
@@ -40,7 +37,6 @@ jobs:
 
       - name: Update Android SDK
         run: |
-          # Update SDK to match Godot 4.6 requirements (API 35)
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
@@ -52,42 +48,19 @@ jobs:
       - name: Configure Editor Settings
         run: |
           chmod +x godot_project/scripts/generate_editor_settings.sh
-          # Pass JAVA_HOME explicitly just in case
+          # Pass JAVA_HOME explicitly
           export JAVA_HOME=$JAVA_HOME
           ./godot_project/scripts/generate_editor_settings.sh
 
-      - name: Run Diagnostics & Verify Tools
-        if: always()
+      - name: Export Android
         run: |
-          chmod +x godot_project/scripts/diagnose_env.sh
-          ./godot_project/scripts/diagnose_env.sh
-          echo "=== Verifying Tools execution ==="
-          echo "ADB Version:"
-          $ANDROID_HOME/platform-tools/adb version || echo "ADB Failed"
-          echo "Jarsigner Help:"
-          jarsigner -help | head -n 1 || echo "Jarsigner Failed"
-          echo "Editor Settings Content:"
-          cat ~/.config/godot/editor_settings-4.tres
-
-      - name: Build
-        run: |
-          # Kill any lingering ADB server to prevent connection refused errors
           $ANDROID_HOME/platform-tools/adb kill-server || true
           cd godot_project
-          mkdir -p build/android
-          # Run godot with explicit env vars for robustness
-          godot --headless --verbose --export-debug "Android" build/android/aistronaut-debug.apk
-
-      - name: Verify Build
-        run: |
-          if [ ! -f godot_project/build/android/aistronaut-debug.apk ]; then
-            echo "Error: APK file not found!"
-            ls -R godot_project/build
-            exit 1
-          fi
+          mkdir -p builds
+          godot --headless --verbose --export-debug "Android" builds/android.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-debug-apk
-          path: godot_project/build/android/aistronaut-debug.apk
+          name: godot-android-build
+          path: godot_project/builds/android.apk

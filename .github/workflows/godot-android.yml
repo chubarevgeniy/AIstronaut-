@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Dependencies
+        run: |
+          apt-get update
+          apt-get install -y unzip fontconfig libfontconfig1
+
       - name: Setup Godot
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates/
@@ -33,6 +38,14 @@ jobs:
               exit 1
             fi
           fi
+
+      - name: Install Android Build Template (Headless Workaround)
+        run: |
+          mkdir -p godot_project/android/build
+          # Unzip source directly into project
+          unzip ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d godot_project/android/build/
+          # Create .build_version file
+          echo "${GODOT_VERSION}.stable" > godot_project/android/build/.build_version
 
       - name: Setup Android Keystore
         run: |
@@ -83,6 +96,12 @@ jobs:
           jarsigner -help | head -n 1 || echo "Jarsigner Failed"
           echo "Editor Settings Content:"
           cat ~/.config/godot/editor_settings-4.tres
+
+      - name: Pre-import assets
+        run: |
+          cd godot_project
+          # Run editor in headless mode to import assets
+          godot --headless --editor --quit || true
 
       - name: Build
         run: |

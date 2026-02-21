@@ -49,6 +49,14 @@ jobs:
           # Also set ANDROID_HOME for consistency
           echo "ANDROID_HOME=/usr/lib/android-sdk" >> $GITHUB_ENV
 
+      - name: Install Android Build Template
+        run: |
+          mkdir -p godot_project/android/build
+          unzip ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d godot_project/android/build
+          # Move content from nested folder if necessary (android_source.zip usually dumps into current dir or android folder)
+          # Let's verify structure
+          ls -R godot_project/android/build | head -n 20
+
       - name: Configure Editor Settings
         run: |
           chmod +x godot_project/scripts/generate_editor_settings.sh

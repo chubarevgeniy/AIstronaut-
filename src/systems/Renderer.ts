@@ -91,8 +91,6 @@ export class Renderer {
 
     private drawNearestPlanetIndicator(ship: Ship, planets: Planet[]) {
         let nearest: Planet | null = null;
-        let minDistSq = Infinity;
-
         let minSurfaceDist = Infinity;
 
         for (const p of planets) {

@@ -10,6 +10,8 @@ export const GameConfig = {
     chunkSize: 600,
     shipCollisionRadius: 5,
     fuelSpawnInterval: 10000,
-    engineType: 0,
-    musicType: 0,
+    engineType: 2,
+    musicType: 2,
+    engineVolume: 0.3,
+    musicVolume: 2.5,
 };

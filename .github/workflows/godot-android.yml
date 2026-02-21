@@ -60,9 +60,9 @@ jobs:
 
       - name: Update Android SDK
         run: |
-          # Update SDK to match Godot 4.6 requirements (API 34/35)
+          # Update SDK to match Godot 4.6.1 requirements (API 35)
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Configure Editor Settings
         run: |

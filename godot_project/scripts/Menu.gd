@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-signal start_game(mode)
+signal start_game(mode, start_ly)
 signal resume_game
 signal restart_game
 signal exit_game
@@ -10,6 +10,7 @@ var container: VBoxContainer
 var title_label: Label
 var score_label: Label
 var high_score_label: Label
+var start_coord_input: LineEdit
 
 func _ready():
 	# Create background (fullscreen overlay)
@@ -120,6 +121,21 @@ func show_start_screen():
 	spacer2.custom_minimum_size = Vector2(0, 20)
 	container.add_child(spacer2)
 
+	# Start Coord (Dev)
+	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	var lbl = Label.new()
+	lbl.text = "START LY:"
+	lbl.add_theme_font_size_override("font_size", 12)
+	hbox.add_child(lbl)
+
+	start_coord_input = LineEdit.new()
+	start_coord_input.placeholder_text = "0"
+	start_coord_input.text = "0"
+	start_coord_input.custom_minimum_size = Vector2(80, 0)
+	hbox.add_child(start_coord_input)
+	container.add_child(hbox)
+
 	create_button("SURVIVAL [FUEL]", func(): _on_start_pressed(0))
 	create_button("ZEN [INF]", func(): _on_start_pressed(1))
 
@@ -181,7 +197,10 @@ func hide_menu():
 		child.queue_free() # Or just hide container
 
 func _on_start_pressed(mode):
-	start_game.emit(mode)
+	var start_ly = 0
+	if start_coord_input and start_coord_input.text.is_valid_int():
+		start_ly = int(start_coord_input.text)
+	start_game.emit(mode, start_ly)
 
 func _on_reset_pressed():
 	Global.high_score_survival = 0

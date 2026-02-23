@@ -16,9 +16,7 @@ export class PhysicsSystem {
             // Simple collision
             if (dist < item.radius + 10) { // Approx ship radius
                 item.collected = true;
-                if (ship.maxFuel !== Infinity) {
-                    ship.fuel = Math.min(ship.maxFuel, ship.fuel + item.amount);
-                }
+                ship.addFuel(item.amount);
             }
         }
     }
@@ -28,6 +26,10 @@ export class PhysicsSystem {
         let gx = 0;
         let gy = 0;
         let hasCollided = false;
+
+        if (ship.nearMissTimer > 0) {
+            ship.nearMissTimer -= deltaTime;
+        }
 
         for (const planet of planets) {
             const dx = planet.x - ship.x;
@@ -57,8 +59,16 @@ export class PhysicsSystem {
 
                 if (planet.type === PlanetType.BlackHole) {
                     force *= 3.0;
-                    if (ship.maxFuel !== Infinity) {
-                         ship.fuel = Math.min(ship.maxFuel, ship.fuel + 50 * deltaTime);
+                    ship.addFuel(50 * deltaTime);
+                }
+
+                // Near Miss Bonus
+                // High speed close pass
+                if (planet.type !== PlanetType.Asteroid && ship.nearMissTimer <= 0) {
+                    // Check if close (radius + ship_size + margin) and fast
+                    if (dist < planet.radius + 60 && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > 400) {
+                        ship.addFuel(1.0);
+                        ship.nearMissTimer = 1.0; // Cooldown
                     }
                 }
 

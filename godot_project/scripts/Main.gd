@@ -34,7 +34,7 @@ func _ready():
 	get_tree().paused = true
 	menu_layer.show_start_screen()
 
-func start_game(mode):
+func start_game(mode, start_ly = 0):
 	Global.game_mode = mode
 
 	# Clear old nodes
@@ -47,13 +47,15 @@ func start_game(mode):
 		if c == menu_layer: continue
 		c.queue_free()
 
-	level_generator.reset()
-	Global.score = 0
+	var start_y = -start_ly * 100.0
+	level_generator.reset(start_y)
+	Global.score = start_ly
 	Global.is_game_over = false
 	Global.is_paused = false
 
 	# Spawn Ship
 	ship = ship_scene.instantiate()
+	ship.position = Vector2(0, start_y)
 	ship.max_fuel = INF if mode == 1 else 100.0
 	ship.fuel = ship.max_fuel
 
@@ -73,15 +75,16 @@ func start_game(mode):
 	hud.ship = ship
 	add_child(hud)
 
-	# Initial Planet
-	var starter = planet_scene.instantiate()
-	starter.position = Vector2(180, -100)
-	starter.radius = 80
-	starter.type = "ice"
-	add_child(starter)
+	# Initial Planet (only if starting at 0)
+	if start_ly == 0:
+		var starter = planet_scene.instantiate()
+		starter.position = Vector2(180, -100)
+		starter.radius = 80
+		starter.type = "ice"
+		add_child(starter)
 
 	# Initial Generation
-	level_generator.generate_chunks(Vector2.ZERO, self, planet_scene)
+	level_generator.generate_chunks(ship.global_position, self, planet_scene)
 
 	# Unpause and hide menu
 	get_tree().paused = false
@@ -100,8 +103,8 @@ func _process(delta):
 		level_generator.cleanup(ship.global_position, self)
 
 # Menu Callbacks
-func _on_menu_start_game(mode):
-	start_game(mode)
+func _on_menu_start_game(mode, start_ly):
+	start_game(mode, start_ly)
 
 func _on_menu_resume():
 	get_tree().paused = false

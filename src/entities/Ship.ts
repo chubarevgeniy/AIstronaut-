@@ -10,6 +10,8 @@ export class Ship {
     fuel: number;
     maxFuel: number;
     hasEjected: boolean;
+    nearMissTimer: number = 0;
+    onFuelGained: (() => void) | null = null;
 
     constructor(x: number, y: number) {
         this.x = x;
@@ -23,5 +25,16 @@ export class Ship {
         this.maxFuel = 100;
         this.fuel = this.maxFuel;
         this.hasEjected = false;
+    }
+
+    addFuel(amount: number) {
+        if (this.maxFuel === Infinity) return;
+
+        const oldFuel = this.fuel;
+        this.fuel = Math.min(this.maxFuel, this.fuel + amount);
+
+        if (this.fuel > oldFuel && this.onFuelGained) {
+            this.onFuelGained();
+        }
     }
 }

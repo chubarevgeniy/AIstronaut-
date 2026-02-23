@@ -55,9 +55,9 @@ export class GameLoop {
         this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
     }
 
-    startGame(mode: GameMode) {
+    startGame(mode: GameMode, startLy: number = 0) {
         this.mode = mode;
-        this.reset();
+        this.reset(startLy);
         this.state = GameState.Playing;
         this.start();
         this.notifyState();
@@ -78,8 +78,9 @@ export class GameLoop {
         }
     }
 
-    reset() {
-        this.ship = new Ship(0, 0);
+    reset(startLy: number = 0) {
+        const startY = -startLy * 100;
+        this.ship = new Ship(0, startY);
         this.ship.vy = -60; // Initial upward velocity
         this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
 
@@ -93,18 +94,21 @@ export class GameLoop {
         this.particleSystem.particles = [];
         this.levelGenerator.reset();
 
-        // Add Starter Planet
-        // Positioned to the side to create an initial orbit
-        // Ship is at (0,0) moving (0, -60)
-        // Planet at (200, -200) pulls ship right+up
-        // Let's try (150, -100)
-        this.planets.push(new Planet(180, -100, 80, PlanetType.Ice));
+        // Add Starter Planet (Only at 0)
+        if (startLy === 0) {
+            this.planets.push(new Planet(180, -100, 80, PlanetType.Ice));
+        }
+
         // Force generate around start
-        const initialPlanets = this.levelGenerator.generate(0, 0, this.planets);
+        const initialPlanets = this.levelGenerator.generate(0, startY, this.planets);
         this.planets.push(...initialPlanets);
 
         // Initial render
         this.draw();
+    }
+
+    warpTo(ly: number) {
+        this.reset(ly);
     }
 
     start() {

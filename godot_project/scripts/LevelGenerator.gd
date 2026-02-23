@@ -4,9 +4,9 @@ class_name LevelGenerator
 var visited_chunks: Dictionary = {}
 var last_fuel_spawn_y: float = 0.0
 
-func reset():
+func reset(start_y: float = 0.0):
 	visited_chunks.clear()
-	last_fuel_spawn_y = 0.0
+	last_fuel_spawn_y = start_y
 
 func generate_chunks(ship_pos: Vector2, parent_node: Node, planet_scene: PackedScene):
 	var cx = floor(ship_pos.x / GameConfig.CHUNK_SIZE)

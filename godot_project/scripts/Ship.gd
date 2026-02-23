@@ -26,11 +26,15 @@ func _physics_process(delta):
 		var dist = sqrt(dist_sq)
 
 		# Collision Check
-		if dist < planet.radius + GameConfig.SHIP_COLLISION_RADIUS:
-			die()
-			return
+		if planet.type != "asteroid":
+			if dist < planet.radius + GameConfig.SHIP_COLLISION_RADIUS:
+				die()
+				return
 
 		if dist > 10 and dist < planet.gravity_radius:
+			# Skip asteroids (handled by gravity_radius=0 but explicit check is fine)
+			if planet.type == "asteroid": continue
+
 			var force_mag = (GameConfig.GRAVITY_CONSTANT * planet.mass) / dist_sq
 			var dir = (planet.global_position - global_position).normalized()
 
@@ -41,6 +45,12 @@ func _physics_process(delta):
 				force *= 3.0
 				if max_fuel != INF:
 					fuel = min(max_fuel, fuel + 50 * delta)
+
+			# Star special (Heat Zone)
+			if planet.type == "star":
+				if dist < planet.gravity_radius / 3.0:
+					if max_fuel != INF:
+						fuel -= GameConfig.STAR_FUEL_BURN_RATE * delta
 
 			gravity_force += force
 

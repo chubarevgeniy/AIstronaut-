@@ -51,9 +51,45 @@ func spawn_planets_in_chunk(chunk: Vector2i, parent: Node, planet_scene: PackedS
 			var p = planet_scene.instantiate()
 			p.position = pos
 			p.radius = rad
-			p.type = pick_random_type()
+
+			var depth = -chunk.y * GameConfig.CHUNK_SIZE
+			p.type = pick_random_type(depth)
+
+			# Override for Star logic
+			if depth > 20000.0 and randf() < 0.05:
+				p.type = "star"
+				p.radius = GameConfig.MAX_PLANET_RADIUS # Force max radius
+
 			parent.call_deferred("add_child", p)
 			planets_in_chunk.append(p)
+
+	# Asteroid Clusters (100+ LY)
+	var chunk_depth = -chunk.y * GameConfig.CHUNK_SIZE
+	if chunk_depth > 10000.0:
+		if randf() < 0.4:
+			var cluster_count = randi_range(3, 8)
+			var cluster_center = Vector2(
+				(chunk.x * GameConfig.CHUNK_SIZE) + randf() * GameConfig.CHUNK_SIZE,
+				(chunk.y * GameConfig.CHUNK_SIZE) + randf() * GameConfig.CHUNK_SIZE
+			)
+
+			for k in range(cluster_count):
+				var off = Vector2(randf() - 0.5, randf() - 0.5) * 200.0
+				var apos = cluster_center + off
+				var arad = randf_range(10.0, 20.0)
+
+				# Check collision with planets (but not other asteroids)
+				var a_valid = true
+				for p in planets_in_chunk:
+					if apos.distance_to(p.position) < (arad + p.radius + 50.0):
+						a_valid = false; break
+
+				if a_valid:
+					var ast = planet_scene.instantiate()
+					ast.position = apos
+					ast.radius = arad
+					ast.type = "asteroid"
+					parent.call_deferred("add_child", ast)
 
 func generate_items(ship_y: float, parent: Node, item_scene: PackedScene):
 	# ship_y is negative going up
@@ -73,6 +109,10 @@ func cleanup(ship_pos: Vector2, parent: Node):
 			if child.global_position.distance_squared_to(ship_pos) > limit:
 				child.queue_free()
 
-func pick_random_type() -> String:
+func pick_random_type(depth: float) -> String:
 	var types = ["dead", "ocean", "ice", "desert", "gas_giant", "black_hole"]
+
+	if depth < 5000.0:
+		types.erase("black_hole")
+
 	return types[randi() % types.size()]

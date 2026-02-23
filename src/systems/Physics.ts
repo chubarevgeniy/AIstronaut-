@@ -36,22 +36,40 @@ export class PhysicsSystem {
             const dist = Math.sqrt(distSq);
 
             // Collision detection
-            if (dist < planet.radius + GameConfig.shipCollisionRadius) { // Simple circle collision
-                hasCollided = true;
+            // Asteroids don't cause Game Over, they are just physical obstacles or background
+            // "Cannot crash into" -> actually means no Game Over collision?
+            // The prompt says "v nih nelzya vrezatsya" (cannot crash into them)
+            // AND "skvoz kotoruyu mozhno proletet" (through which you can fly).
+            // This implies they are sensors/visuals but we can push off them.
+            // So we skip collision check for Game Over.
+            if (planet.type !== PlanetType.Asteroid) {
+                if (dist < planet.radius + GameConfig.shipCollisionRadius) {
+                    hasCollided = true;
+                }
             }
 
-            // Simple gravity logic: pull towards center
-            // Avoid applying massive forces when very close (inside planet)
-            // Also respect gravity radius
+            // Simple gravity logic
             if (dist > 10 && dist < planet.gravityRadius) {
+                // Skip gravity for Asteroids (though mass=0 handles it, optimization here)
+                if (planet.type === PlanetType.Asteroid) continue;
+
                 let force = (GameConfig.gravityConstant * planet.mass) / distSq;
 
                 if (planet.type === PlanetType.BlackHole) {
-                    force *= 3.0; // Stronger gravity
-
-                    // Fuel Regen in orbit
+                    force *= 3.0;
                     if (ship.maxFuel !== Infinity) {
                          ship.fuel = Math.min(ship.maxFuel, ship.fuel + 50 * deltaTime);
+                    }
+                }
+
+                if (planet.type === PlanetType.Star) {
+                    // Star Logic: Red dashed line (Danger Zone)
+                    // "Inner 1/3 of gravity field"
+                    const dangerRadius = planet.gravityRadius / 3.0;
+                    if (dist < dangerRadius) {
+                        if (ship.maxFuel !== Infinity) {
+                            ship.fuel -= (GameConfig.starFuelBurnRate || 20) * deltaTime;
+                        }
                     }
                 }
 

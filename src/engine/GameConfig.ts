@@ -14,4 +14,5 @@ export const GameConfig = {
     musicType: 2,
     engineVolume: 0.3,
     musicVolume: 2.5,
+    starFuelBurnRate: 20,
 };

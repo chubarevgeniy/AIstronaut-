@@ -15,6 +15,7 @@ export class Renderer {
     private width: number;
     private height: number;
     private stars: Star[] = [];
+    private fuelFlashTimer: number = 0;
 
     constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
         this.ctx = ctx;
@@ -81,7 +82,7 @@ export class Renderer {
         this.drawShip(ship);
 
         // Draw Nearest Planet Indicator
-        this.drawNearestPlanetIndicator(ship, planets);
+        this.drawNearestPlanetIndicator(ship, planets, items);
 
         this.ctx.restore();
 
@@ -89,10 +90,15 @@ export class Renderer {
         this.drawHUD(ship);
     }
 
-    private drawNearestPlanetIndicator(ship: Ship, planets: Planet[]) {
-        let nearest: Planet | null = null;
+    triggerFuelFlash() {
+        this.fuelFlashTimer = 1.0;
+    }
+
+    private drawNearestPlanetIndicator(ship: Ship, planets: Planet[], items: FuelItem[]) {
+        let nearest: { x: number, y: number, radius: number, isFuel: boolean } | null = null;
         let minSurfaceDist = Infinity;
 
+        // Check Planets
         for (const p of planets) {
             const dx = p.x - ship.x;
             const dy = p.y - ship.y;
@@ -101,8 +107,22 @@ export class Renderer {
 
             if (surfaceDist < minSurfaceDist) {
                 minSurfaceDist = surfaceDist;
-                nearest = p;
+                nearest = { x: p.x, y: p.y, radius: p.radius, isFuel: false };
             }
+        }
+
+        // Check Items
+        for (const item of items) {
+             if (item.collected) continue;
+             const dx = item.x - ship.x;
+             const dy = item.y - ship.y;
+             const dist = Math.sqrt(dx * dx + dy * dy);
+             const surfaceDist = dist - item.radius;
+
+             if (surfaceDist < minSurfaceDist) {
+                 minSurfaceDist = surfaceDist;
+                 nearest = { x: item.x, y: item.y, radius: item.radius, isFuel: true };
+             }
         }
 
         if (nearest) {
@@ -110,19 +130,16 @@ export class Renderer {
             const dy = nearest.y - ship.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Only draw if within a reasonable range (e.g. 2000px, same as thrust logic)
-            // Use surface distance check for logic consistency, or simple distance?
-            // The indicator visual should probably persist based on surface distance too.
-            if (minSurfaceDist < 2000) {
+            if (minSurfaceDist > 10 && minSurfaceDist < 2000) {
                 const indicatorDist = 40; // Distance from ship center
                 const ix = (dx / dist) * indicatorDist;
                 const iy = (dy / dist) * indicatorDist;
 
                 this.ctx.save();
                 this.ctx.translate(ship.x + ix, ship.y + iy);
-                this.ctx.fillStyle = 'red';
+                this.ctx.fillStyle = nearest.isFuel ? '#00FF00' : 'red';
                 this.ctx.beginPath();
-                this.ctx.arc(0, 0, 2, 0, Math.PI * 2); // Small red dot
+                this.ctx.arc(0, 0, 2, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.restore();
             }
@@ -149,24 +166,34 @@ export class Renderer {
     }
 
     private drawItem(item: FuelItem) {
-        // Items are drawn in world space, the transform is already applied in render()
-        // So we just draw at item.x, item.y
+        this.ctx.save();
+        this.ctx.translate(item.x, item.y);
 
-        this.ctx.fillStyle = '#00FF00';
+        // Green glow
+        const time = Date.now() / 200;
+        this.ctx.fillStyle = `rgba(0, 255, 0, 0.3)`;
         this.ctx.beginPath();
-        this.ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+        this.ctx.arc(0, 0, item.radius, 0, Math.PI * 2);
         this.ctx.fill();
 
-        // Pulsing glow
-        const time = Date.now() / 200;
-        this.ctx.strokeStyle = `rgba(0, 255, 0, ${Math.abs(Math.sin(time))})`;
+        // Crashed Ship Model (Jagged)
+        this.ctx.fillStyle = '#999999';
+        this.ctx.strokeStyle = '#FFFFFF';
         this.ctx.lineWidth = 2;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -20);   // Nose
+        this.ctx.lineTo(-10, -5);  // Left crack
+        this.ctx.lineTo(-15, 10);  // Left Wing tip
+        this.ctx.lineTo(-5, 5);    // Broken part
+        this.ctx.lineTo(5, 15);    // Right debris
+        this.ctx.lineTo(15, 10);   // Right Wing tip
+        this.ctx.lineTo(10, -5);    // Right crack
+        this.ctx.closePath();
+        this.ctx.fill();
         this.ctx.stroke();
 
-        // Label
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '10px "JetBrains Mono"';
-        this.ctx.fillText("FUEL", item.x - 12, item.y - 15);
+        this.ctx.restore();
     }
 
     private drawPlanet(planet: Planet) {
@@ -285,6 +312,11 @@ export class Renderer {
         if (ship.maxFuel !== Infinity) {
             this.ctx.fillText(`FUEL`, 10, 80);
 
+            // Update Flash Timer (Assuming 60fps roughly for visual decay)
+            if (this.fuelFlashTimer > 0) {
+                this.fuelFlashTimer -= 0.1;
+            }
+
             // Dotted Fuel Bar
             const barX = 50;
             const barY = 72;
@@ -297,7 +329,14 @@ export class Renderer {
 
             for (let i = 0; i < totalDots; i++) {
                 if (i < activeDots) {
-                    this.ctx.fillStyle = fuelPercent > 0.2 ? '#ffffff' : '#ff0000';
+                    // Logic: Green Flash > Orange Thrust > Red Low Fuel > White Normal
+                    if (this.fuelFlashTimer > 0) {
+                         this.ctx.fillStyle = '#00FF00'; // Green Flash
+                    } else if (ship.isThrusting) {
+                         this.ctx.fillStyle = '#FFA500'; // Orange Burn
+                    } else {
+                         this.ctx.fillStyle = fuelPercent > 0.2 ? '#ffffff' : '#ff0000';
+                    }
                 } else {
                     this.ctx.fillStyle = '#333333';
                 }

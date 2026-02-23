@@ -86,7 +86,11 @@ func _process(delta):
 				if ship.is_thrusting:
 					fuel_bar.self_modulate = Color(1, 0.5, 0) # Orange
 				else:
-					fuel_bar.self_modulate = Color.WHITE
+					# Red if low fuel (< 20%), else White
+					if (ship.fuel / ship.max_fuel) < 0.2:
+						fuel_bar.self_modulate = Color(1, 0, 0) # Red
+					else:
+						fuel_bar.self_modulate = Color.WHITE
 
 func _on_fuel_gained():
 	if not fuel_bar: return

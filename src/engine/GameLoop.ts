@@ -50,6 +50,9 @@ export class GameLoop {
         this.levelGenerator.reset();
 
         this.renderer = new Renderer(context, canvas.width, canvas.height);
+
+        // Connect initial ship
+        this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
     }
 
     startGame(mode: GameMode) {
@@ -78,6 +81,7 @@ export class GameLoop {
     reset() {
         this.ship = new Ship(0, 0);
         this.ship.vy = -60; // Initial upward velocity
+        this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
 
         if (this.mode === GameMode.Zen) {
             this.ship.maxFuel = Infinity;

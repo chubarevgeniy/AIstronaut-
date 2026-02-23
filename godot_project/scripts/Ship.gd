@@ -74,7 +74,7 @@ func _physics_process(delta):
 				min_surface_dist = surface_dist
 				nearest_obj = item
 
-		if nearest_obj:
+		if nearest_obj and min_surface_dist < 2000:
 			var dir = (nearest_obj.global_position - global_position).normalized()
 			if nearest_obj.is_in_group("fuel"):
 				# PULL TOWARDS FUEL (New Feature)

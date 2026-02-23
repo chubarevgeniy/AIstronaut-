@@ -11,14 +11,26 @@ func _ready():
 
 func _on_body_entered(body):
 	if body.is_in_group("player"):
-		if body.max_fuel != INF:
+		if body.has_method("add_fuel"):
+			body.add_fuel(amount)
+		elif body.max_fuel != INF:
+			# Fallback if method missing (should not happen)
 			body.fuel = min(body.max_fuel, body.fuel + amount)
 		queue_free()
 
 func _draw():
-	# Green glow
-	draw_circle(Vector2.ZERO, radius, Color(0, 1, 0, 0.6))
-	draw_arc(Vector2.ZERO, radius, 0, TAU, 16, Color.WHITE, 1.0)
+	# Green glow (keep it so player sees it)
+	draw_circle(Vector2.ZERO, radius, Color(0, 1, 0, 0.3))
 
-	# Label (Optional, simplistic)
-	# draw_string(ThemeDB.fallback_font, Vector2(-10, 5), "F")
+	# Crashed Ship Model (Jagged shape)
+	var points = PackedVector2Array([
+		Vector2(0, -20),   # Nose
+		Vector2(-10, -5),  # Left crack
+		Vector2(-15, 10),  # Left Wing tip
+		Vector2(-5, 5),    # Broken part
+		Vector2(5, 15),    # Right debris
+		Vector2(15, 10),   # Right Wing tip
+		Vector2(10, -5)    # Right crack
+	])
+	draw_colored_polygon(points, Color(0.6, 0.6, 0.6)) # Gray body
+	draw_polyline(points, Color.WHITE, 2.0) # Outline

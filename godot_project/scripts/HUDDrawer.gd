@@ -11,15 +11,26 @@ func _draw():
 	# Draw Indicator
 	# Fix: Use surface distance (dist - radius)
 	var planets = get_tree().get_nodes_in_group("planets")
+	var fuels = get_tree().get_nodes_in_group("fuel")
+
 	var nearest = null
 	var min_surface_dist = INF
 
+	# Check Planets
 	for p in planets:
 		var dist = ship.global_position.distance_to(p.global_position)
 		var surface_dist = dist - p.radius
 		if surface_dist < min_surface_dist:
 			min_surface_dist = surface_dist
 			nearest = p
+
+	# Check Fuel
+	for f in fuels:
+		var dist = ship.global_position.distance_to(f.global_position)
+		var surface_dist = dist - f.radius # Assuming FuelItem has radius property
+		if surface_dist < min_surface_dist:
+			min_surface_dist = surface_dist
+			nearest = f
 
 	# Center of screen (Player position relative to Camera)
 	var center = get_viewport().get_visible_rect().size / 2
@@ -28,4 +39,8 @@ func _draw():
 		var dir = (nearest.global_position - ship.global_position).normalized()
 		var offset = dir * 60.0 # Indicator radius
 
-		draw_circle(center + offset, 4.0, Color.RED)
+		var color = Color.RED
+		if nearest.is_in_group("fuel"):
+			color = Color.GREEN
+
+		draw_circle(center + offset, 4.0, color)

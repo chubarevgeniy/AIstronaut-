@@ -2,12 +2,14 @@ extends CharacterBody2D
 
 signal fuel_empty
 signal game_over
+signal fuel_gained
 
 var fuel: float = 100.0
 var max_fuel: float = 100.0
 var rotation_speed: float = 5.0
 var is_thrusting: bool = false
 var has_ejected: bool = false
+var near_miss_timer: float = 0.0
 
 func _ready():
 	add_to_group("player")
@@ -44,7 +46,14 @@ func _physics_process(delta):
 			if planet.type == "black_hole":
 				force *= 3.0
 				if max_fuel != INF:
-					fuel = min(max_fuel, fuel + 50 * delta)
+					add_fuel(50 * delta)
+
+			# Near Miss Bonus (High speed close pass)
+			if planet.type != "asteroid" and near_miss_timer <= 0:
+				# Check if close (radius + ship_size + margin) and fast
+				if dist < planet.radius + 60.0 and velocity.length() > 400.0:
+					add_fuel(1.0)
+					near_miss_timer = 1.0 # Cooldown 1 second
 
 			# Star special (Heat Zone)
 			if planet.type == "star":
@@ -53,6 +62,9 @@ func _physics_process(delta):
 						fuel -= GameConfig.STAR_FUEL_BURN_RATE * delta
 
 			gravity_force += force
+
+	if near_miss_timer > 0:
+		near_miss_timer -= delta
 
 	# Thrust
 	var thrust_force = Vector2.ZERO
@@ -161,6 +173,15 @@ func eject():
 		velocity += dir * 400.0
 	else:
 		velocity += Vector2.UP * 400.0
+
+func add_fuel(amount: float):
+	if max_fuel == INF: return
+
+	var old_fuel = fuel
+	fuel = min(max_fuel, fuel + amount)
+
+	if fuel > old_fuel:
+		fuel_gained.emit()
 
 func die():
 	if Global.is_game_over: return

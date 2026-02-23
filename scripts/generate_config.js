@@ -34,7 +34,8 @@ const floatKeys = [
     'shipCollisionRadius',
     'fuelSpawnInterval',
     'engineVolume',
-    'musicVolume'
+    'musicVolume',
+    'starFuelBurnRate'
 ];
 
 // Keys to exclude from Godot (Web specific)

@@ -95,12 +95,80 @@ export class LevelGenerator {
                         }
 
                         if (valid) {
-                            // Random Type
+                            // Random Type Logic based on depth
+                            let type: PlanetType;
                             const types = Object.values(PlanetType) as PlanetType[];
-                            const type = types[Math.floor(Math.random() * types.length)];
+
+                            // Filter valid types based on depth (y is negative going up)
+                            // 50 LY = -5000
+                            // 100 LY = -10000
+                            // 200 LY = -20000
+
+                            const depth = -y; // Positive distance
+
+                            // Phase 1: 0-50 LY (No Black Holes)
+                            let availableTypes = types.filter(t => t !== PlanetType.Asteroid && t !== PlanetType.Star);
+                            if (depth < 5000) {
+                                availableTypes = availableTypes.filter(t => t !== PlanetType.BlackHole);
+                            }
+
+                            // Phase 3: 200 LY+ (Add Stars)
+                            if (depth > 20000) {
+                                // Small chance for Star
+                                if (Math.random() < 0.05) {
+                                     type = PlanetType.Star;
+                                     radius = GameConfig.maxPlanetRadius; // Stars are big
+                                } else {
+                                     type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                                }
+                            } else {
+                                type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                            }
 
                             newPlanets.push(new Planet(x, y, radius, type));
                         }
+                    }
+
+                    // Phase 2: 100 LY+ (Add Asteroid Clusters)
+                    // Separate pass for asteroids to allow density
+                    const asteroidStartDepth = 10000;
+                    const chunkDepth = -chunkY * GameConfig.chunkSize;
+
+                    if (chunkDepth > asteroidStartDepth) {
+                         if (Math.random() < 0.4) { // 40% chance per chunk to have a cluster
+                             const clusterCount = Math.floor(Math.random() * 5) + 3; // 3-8 asteroids
+                             const clusterX = (chunkX * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+                             const clusterY = (chunkY * GameConfig.chunkSize) + Math.random() * GameConfig.chunkSize;
+
+                             for(let k=0; k<clusterCount; k++) {
+                                 const offX = (Math.random() - 0.5) * 200;
+                                 const offY = (Math.random() - 0.5) * 200;
+                                 const ax = clusterX + offX;
+                                 const ay = clusterY + offY;
+                                 const ar = 10 + Math.random() * 10; // Small radius
+
+                                 // Simple collision check against existing planets only (not other asteroids to allow overlap/density)
+                                 let aValid = true;
+                                 for (const p of newPlanets) {
+                                     const dist = Math.sqrt((ax - p.x)**2 + (ay - p.y)**2);
+                                     if (dist < p.radius + ar + 50) {
+                                         aValid = false; break;
+                                     }
+                                 }
+                                 if (existingPlanets) {
+                                      for (const p of existingPlanets) {
+                                         const dist = Math.sqrt((ax - p.x)**2 + (ay - p.y)**2);
+                                         if (dist < p.radius + ar + 50) {
+                                             aValid = false; break;
+                                         }
+                                     }
+                                 }
+
+                                 if (aValid) {
+                                     newPlanets.push(new Planet(ax, ay, ar, PlanetType.Asteroid));
+                                 }
+                             }
+                         }
                     }
                 }
             }

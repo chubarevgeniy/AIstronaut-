@@ -170,14 +170,27 @@ export class Renderer {
     }
 
     private drawPlanet(planet: Planet) {
-        // Draw Gravity Radius
-        this.ctx.beginPath();
-        this.ctx.setLineDash([5, 5]);
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        this.ctx.lineWidth = 1;
-        this.ctx.arc(planet.x, planet.y, planet.gravityRadius, 0, Math.PI * 2);
-        this.ctx.stroke();
-        this.ctx.setLineDash([]);
+        // Draw Gravity Radius (Skip for Asteroids)
+        if (planet.type !== PlanetType.Asteroid) {
+            this.ctx.beginPath();
+            this.ctx.setLineDash([5, 5]);
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            this.ctx.lineWidth = 1;
+            this.ctx.arc(planet.x, planet.y, planet.gravityRadius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+        }
+
+        // Star Danger Zone
+        if (planet.type === PlanetType.Star) {
+            this.ctx.beginPath();
+            this.ctx.setLineDash([10, 5]);
+            this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)'; // Red Dashed
+            this.ctx.lineWidth = 2;
+            this.ctx.arc(planet.x, planet.y, planet.gravityRadius / 3, 0, Math.PI * 2); // 1/3 of gravity field
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+        }
 
         if (planet.type === PlanetType.BlackHole) {
             // Accretion Disk (Outer Glow)
@@ -199,6 +212,21 @@ export class Renderer {
             this.ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
             this.ctx.fill();
             this.ctx.stroke();
+            return;
+        }
+
+        if (planet.type === PlanetType.Asteroid) {
+            this.ctx.fillStyle = planet.color;
+            this.ctx.beginPath();
+            // Draw irregular shape or just circle for now. Keeping it simple.
+            this.ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Texture/Details
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            this.ctx.beginPath();
+            this.ctx.arc(planet.x + planet.radius * 0.3, planet.y + planet.radius * 0.3, planet.radius * 0.3, 0, Math.PI * 2);
+            this.ctx.fill();
             return;
         }
 

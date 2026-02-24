@@ -35,7 +35,12 @@ const floatKeys = [
     'fuelSpawnInterval',
     'engineVolume',
     'musicVolume',
-    'starFuelBurnRate'
+    'starFuelBurnRate',
+    'nearMissSpeedThreshold',
+    'nearMissFuelReward',
+    'nearMissCooldown',
+    'nearMissDistance',
+    'debugStartDistance'
 ];
 
 // Keys to exclude from Godot (Web specific)

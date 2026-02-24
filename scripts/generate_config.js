@@ -40,7 +40,8 @@ const floatKeys = [
     'nearMissFuelReward',
     'nearMissCooldown',
     'nearMissDistance',
-    'debugStartDistance'
+    'debugStartDistance',
+    'landingMaxSpeed'
 ];
 
 // Keys to exclude from Godot (Web specific)

@@ -18,5 +18,7 @@
   "nearMissFuelReward": 10.0,
   "nearMissCooldown": 1.0,
   "nearMissDistance": 40,
-  "debugStartDistance": 0
+  "debugStartDistance": 0,
+  "landingMaxSpeed": 50.0,
+  "debugShowNearMiss": 0
 }

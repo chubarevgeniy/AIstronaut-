@@ -16,6 +16,8 @@ export class Renderer {
     private height: number;
     private stars: Star[] = [];
     private fuelFlashTimer: number = 0;
+    private notificationTimer: number = 0;
+    private notificationText: string = "";
 
     constructor(ctx: CanvasRenderingContext2D, width: number, height: number) {
         this.ctx = ctx;
@@ -86,12 +88,53 @@ export class Renderer {
 
         this.ctx.restore();
 
+        // Draw White Flag if Landed
+        if (ship.isLanded) {
+            this.ctx.save();
+            this.ctx.translate(ship.x - camX, ship.y - camY);
+            // Draw flag relative to ship
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.strokeStyle = '#FFFFFF';
+            this.ctx.lineWidth = 2;
+
+            // Pole
+            this.ctx.beginPath();
+            this.ctx.moveTo(10, 10);
+            this.ctx.lineTo(10, -15);
+            this.ctx.stroke();
+
+            // Flag
+            this.ctx.beginPath();
+            this.ctx.moveTo(10, -15);
+            this.ctx.lineTo(25, -10);
+            this.ctx.lineTo(10, -5);
+            this.ctx.fill();
+
+            this.ctx.restore();
+        }
+
+        // Draw Notification
+        if (this.notificationTimer > 0) {
+            this.notificationTimer -= 0.016;
+            this.ctx.save();
+            this.ctx.font = '20px "JetBrains Mono", monospace';
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, this.notificationTimer)})`;
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.notificationText, this.width / 2, this.height / 2);
+            this.ctx.restore();
+        }
+
         // Draw HUD
         this.drawHUD(ship);
     }
 
     triggerFuelFlash() {
         this.fuelFlashTimer = 1.0;
+    }
+
+    showNotification(text: string) {
+        this.notificationText = text;
+        this.notificationTimer = 2.0;
     }
 
     private drawNearestPlanetIndicator(ship: Ship, planets: Planet[], items: FuelItem[]) {

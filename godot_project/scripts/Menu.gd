@@ -133,6 +133,16 @@ func show_start_screen():
 	start_coord_input.placeholder_text = "0"
 	start_coord_input.text = "0"
 	start_coord_input.custom_minimum_size = Vector2(80, 0)
+
+	# Style input
+	var input_style = StyleBoxFlat.new()
+	input_style.bg_color = Color.BLACK
+	input_style.border_color = Color(0.4, 0.4, 0.4)
+	input_style.set_border_width_all(1)
+	input_style.content_margin_left = 5
+	start_coord_input.add_theme_stylebox_override("normal", input_style)
+	start_coord_input.add_theme_stylebox_override("focus", input_style)
+
 	hbox.add_child(start_coord_input)
 	container.add_child(hbox)
 
@@ -198,8 +208,10 @@ func hide_menu():
 
 func _on_start_pressed(mode):
 	var start_ly = 0
-	if start_coord_input and start_coord_input.text.is_valid_int():
-		start_ly = int(start_coord_input.text)
+	if start_coord_input:
+		var text = start_coord_input.text.strip_edges()
+		if text.is_valid_int():
+			start_ly = int(text)
 	start_game.emit(mode, start_ly)
 
 func _on_reset_pressed():

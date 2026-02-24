@@ -13,5 +13,8 @@
   "musicType": 2,
   "engineVolume": 0.3,
   "musicVolume": 2.5,
-  "starFuelBurnRate": 20.0
+  "starFuelBurnRate": 20.0,
+  "nearMissSpeedThreshold": 200,
+  "nearMissFuelReward": 20.0,
+  "nearMissCooldown": 1.0
 }

@@ -51,9 +51,9 @@ func _physics_process(delta):
 			# Near Miss Bonus (High speed close pass)
 			if planet.type != "asteroid" and near_miss_timer <= 0:
 				# Check if close (radius + ship_size + margin) and fast
-				if dist < planet.radius + 60.0 and velocity.length() > 400.0:
-					add_fuel(1.0)
-					near_miss_timer = 1.0 # Cooldown 1 second
+				if dist < planet.radius + 60.0 and velocity.length() > GameConfig.NEAR_MISS_SPEED_THRESHOLD:
+					add_fuel(GameConfig.NEAR_MISS_FUEL_REWARD)
+					near_miss_timer = GameConfig.NEAR_MISS_COOLDOWN
 
 			# Star special (Heat Zone)
 			if planet.type == "star":

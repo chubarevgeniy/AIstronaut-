@@ -170,7 +170,6 @@ export class Renderer {
         this.ctx.translate(item.x, item.y);
 
         // Green glow
-        const time = Date.now() / 200;
         this.ctx.fillStyle = `rgba(0, 255, 0, 0.3)`;
         this.ctx.beginPath();
         this.ctx.arc(0, 0, item.radius, 0, Math.PI * 2);

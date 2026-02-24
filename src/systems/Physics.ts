@@ -52,39 +52,40 @@ export class PhysicsSystem {
 
             // Simple gravity logic
             if (dist > 10 && dist < planet.gravityRadius) {
-                // Skip gravity for Asteroids (though mass=0 handles it, optimization here)
-                if (planet.type === PlanetType.Asteroid) continue;
+                // Skip logic for Asteroids completely
+                if (planet.type !== PlanetType.Asteroid) {
 
-                let force = (GameConfig.gravityConstant * planet.mass) / distSq;
+                    let force = (GameConfig.gravityConstant * planet.mass) / distSq;
 
-                if (planet.type === PlanetType.BlackHole) {
-                    force *= 3.0;
-                    ship.addFuel(50 * deltaTime);
-                }
-
-                // Near Miss Bonus
-                // High speed close pass
-                if (planet.type !== PlanetType.Asteroid && ship.nearMissTimer <= 0) {
-                    // Check if close (radius + ship_size + margin) and fast
-                    if (dist < planet.radius + 60 && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > 400) {
-                        ship.addFuel(1.0);
-                        ship.nearMissTimer = 1.0; // Cooldown
+                    if (planet.type === PlanetType.BlackHole) {
+                        force *= 3.0;
+                        ship.addFuel(50 * deltaTime);
                     }
-                }
 
-                if (planet.type === PlanetType.Star) {
-                    // Star Logic: Red dashed line (Danger Zone)
-                    // "Inner 1/3 of gravity field"
-                    const dangerRadius = planet.gravityRadius / 3.0;
-                    if (dist < dangerRadius) {
-                        if (ship.maxFuel !== Infinity) {
-                            ship.fuel -= (GameConfig.starFuelBurnRate || 20) * deltaTime;
+                    // Near Miss Bonus
+                    // High speed close pass
+                    if (ship.nearMissTimer <= 0) {
+                        // Check if close (radius + ship_size + margin) and fast
+                        if (dist < planet.radius + 60 && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > 400) {
+                            ship.addFuel(1.0);
+                            ship.nearMissTimer = 1.0; // Cooldown
                         }
                     }
-                }
 
-                gx += force * (dx / dist);
-                gy += force * (dy / dist);
+                    if (planet.type === PlanetType.Star) {
+                        // Star Logic: Red dashed line (Danger Zone)
+                        // "Inner 1/3 of gravity field"
+                        const dangerRadius = planet.gravityRadius / 3.0;
+                        if (dist < dangerRadius) {
+                            if (ship.maxFuel !== Infinity) {
+                                ship.fuel -= (GameConfig.starFuelBurnRate || 20) * deltaTime;
+                            }
+                        }
+                    }
+
+                    gx += force * (dx / dist);
+                    gy += force * (dy / dist);
+                }
             }
         }
 

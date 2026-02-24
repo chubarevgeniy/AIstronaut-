@@ -10,6 +10,7 @@ export class Ship {
     fuel: number;
     maxFuel: number;
     hasEjected: boolean;
+    thrustCooldown: number = 0;
     nearMissTimer: number = 0;
     onFuelGained: (() => void) | null = null;
     isLanded: boolean = false;

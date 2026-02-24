@@ -20,6 +20,6 @@ export const GameConfig = {
     nearMissCooldown: 1,
     nearMissDistance: 40,
     debugStartDistance: 0,
-    landingMaxSpeed: 50,
+    landingMaxSpeed: 65,
     debugShowNearMiss: 0,
 };

@@ -21,6 +21,8 @@ export class Planet {
     type: PlanetType;
     color: string;
     gravityScale: number;
+    hasFlag: boolean = false;
+    flagAngle: number = 0;
 
     get gravityRadius(): number {
         return this.radius * this.gravityScale;

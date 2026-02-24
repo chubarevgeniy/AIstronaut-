@@ -19,6 +19,6 @@
   "nearMissCooldown": 1.0,
   "nearMissDistance": 40,
   "debugStartDistance": 0,
-  "landingMaxSpeed": 50.0,
+  "landingMaxSpeed": 65.0,
   "debugShowNearMiss": 0
 }

@@ -33,6 +33,11 @@ export class PhysicsSystem {
                 // Takeoff
                 ship.isLanded = false;
                 const angle = ship.landedPlanet.angle;
+
+                // Push out slightly to avoid immediate re-collision
+                ship.x += Math.cos(angle) * 5;
+                ship.y += Math.sin(angle) * 5;
+
                 ship.vx += Math.cos(angle) * 100;
                 ship.vy += Math.sin(angle) * 100;
                 ship.landedPlanet = null;

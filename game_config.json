@@ -14,7 +14,9 @@
   "engineVolume": 0.3,
   "musicVolume": 2.5,
   "starFuelBurnRate": 20.0,
-  "nearMissSpeedThreshold": 200,
-  "nearMissFuelReward": 20.0,
-  "nearMissCooldown": 1.0
+  "nearMissSpeedThreshold": 300,
+  "nearMissFuelReward": 10.0,
+  "nearMissCooldown": 1.0,
+  "nearMissDistance": 40,
+  "debugStartDistance": 0
 }

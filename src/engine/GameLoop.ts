@@ -57,6 +57,9 @@ export class GameLoop {
 
     startGame(mode: GameMode, startLy: number = 0) {
         this.mode = mode;
+        if (startLy === 0 && GameConfig.debugStartDistance > 0) {
+            startLy = GameConfig.debugStartDistance;
+        }
         this.reset(startLy);
         this.state = GameState.Playing;
         this.start();
@@ -92,7 +95,7 @@ export class GameLoop {
         this.planets = [];
         this.items = [];
         this.particleSystem.particles = [];
-        this.levelGenerator.reset();
+        this.levelGenerator.reset(startY);
 
         // Add Starter Planet (Only at 0)
         if (startLy === 0) {

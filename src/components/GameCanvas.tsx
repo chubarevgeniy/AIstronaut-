@@ -170,7 +170,7 @@ export const GameCanvas: React.FC = () => {
                 onEject={handleEject}
                 onVolumeChange={handleVolumeChange}
             />
-            <DebugMenu gameState={gameState} />
+            <DebugMenu gameState={gameState} onWarp={(ly) => gameLoopRef.current?.warpTo(ly)} />
         </div>
     );
 };

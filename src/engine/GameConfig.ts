@@ -15,7 +15,9 @@ export const GameConfig = {
     engineVolume: 0.3,
     musicVolume: 2.5,
     starFuelBurnRate: 20,
-    nearMissSpeedThreshold: 200,
-    nearMissFuelReward: 20,
+    nearMissSpeedThreshold: 300,
+    nearMissFuelReward: 10,
     nearMissCooldown: 1,
+    nearMissDistance: 40,
+    debugStartDistance: 0,
 };

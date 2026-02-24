@@ -66,7 +66,7 @@ export class PhysicsSystem {
                     // High speed close pass
                     if (ship.nearMissTimer <= 0) {
                         // Check if close (radius + ship_size + margin) and fast
-                        if (dist < planet.radius + 60 && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > GameConfig.nearMissSpeedThreshold) {
+                        if (dist < planet.radius + GameConfig.nearMissDistance && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > GameConfig.nearMissSpeedThreshold) {
                             ship.addFuel(GameConfig.nearMissFuelReward);
                             ship.nearMissTimer = GameConfig.nearMissCooldown; // Cooldown
                         }

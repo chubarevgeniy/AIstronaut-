@@ -195,8 +195,8 @@ export class LevelGenerator {
         }
     }
 
-    reset() {
+    reset(startY: number = 0) {
         this.visitedChunks.clear();
-        this.lastFuelSpawnY = 0;
+        this.lastFuelSpawnY = startY;
     }
 }

@@ -309,6 +309,33 @@ export class Renderer {
         this.ctx.beginPath();
         this.ctx.arc(planet.x - planet.radius * 0.2, planet.y - planet.radius * 0.2, planet.radius * 0.2, 0, Math.PI * 2);
         this.ctx.fill();
+
+        if (planet.hasFlag) {
+            this.ctx.save();
+            const surfX = planet.x + Math.cos(planet.flagAngle) * planet.radius;
+            const surfY = planet.y + Math.sin(planet.flagAngle) * planet.radius;
+            this.ctx.translate(surfX, surfY);
+            this.ctx.rotate(planet.flagAngle + Math.PI / 2);
+
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.strokeStyle = '#FFFFFF';
+            this.ctx.lineWidth = 2;
+
+            // Pole
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(0, -25);
+            this.ctx.stroke();
+
+            // Flag
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, -25);
+            this.ctx.lineTo(15, -20);
+            this.ctx.lineTo(0, -15);
+            this.ctx.fill();
+
+            this.ctx.restore();
+        }
     }
 
     private drawShip(ship: Ship) {

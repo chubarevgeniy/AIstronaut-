@@ -22,6 +22,11 @@ export class PhysicsSystem {
     }
 
     update(ship: Ship, planets: Planet[], items: FuelItem[], deltaTime: number): boolean {
+        if (ship.thrustCooldown > 0) {
+            ship.thrustCooldown -= deltaTime;
+            ship.isThrusting = false;
+        }
+
         // Landed Logic
         if (ship.isLanded && ship.landedPlanet) {
             if (ship.isThrusting) {
@@ -66,7 +71,16 @@ export class PhysicsSystem {
                     if (speed < GameConfig.landingMaxSpeed) {
                         // Land
                         ship.isLanded = true;
+                        ship.isThrusting = false;
+                        ship.thrustCooldown = 1.0;
+
                         const angle = Math.atan2(ship.y - planet.y, ship.x - planet.x);
+                        ship.rotation = angle;
+                        ship.addFuel(5);
+
+                        planet.hasFlag = true;
+                        planet.flagAngle = angle;
+
                         ship.landedPlanet = {
                             x: planet.x,
                             y: planet.y,

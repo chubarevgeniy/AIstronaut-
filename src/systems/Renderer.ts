@@ -88,31 +88,6 @@ export class Renderer {
 
         this.ctx.restore();
 
-        // Draw White Flag if Landed
-        if (ship.isLanded) {
-            this.ctx.save();
-            this.ctx.translate(ship.x - camX, ship.y - camY);
-            // Draw flag relative to ship
-            this.ctx.fillStyle = '#FFFFFF';
-            this.ctx.strokeStyle = '#FFFFFF';
-            this.ctx.lineWidth = 2;
-
-            // Pole
-            this.ctx.beginPath();
-            this.ctx.moveTo(10, 10);
-            this.ctx.lineTo(10, -15);
-            this.ctx.stroke();
-
-            // Flag
-            this.ctx.beginPath();
-            this.ctx.moveTo(10, -15);
-            this.ctx.lineTo(25, -10);
-            this.ctx.lineTo(10, -5);
-            this.ctx.fill();
-
-            this.ctx.restore();
-        }
-
         // Draw Notification
         if (this.notificationTimer > 0) {
             this.notificationTimer -= 0.016;

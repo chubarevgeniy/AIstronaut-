@@ -22,6 +22,27 @@ export class PhysicsSystem {
     }
 
     update(ship: Ship, planets: Planet[], items: FuelItem[], deltaTime: number): boolean {
+        // Landed Logic
+        if (ship.isLanded && ship.landedPlanet) {
+            if (ship.isThrusting) {
+                // Takeoff
+                ship.isLanded = false;
+                const angle = ship.landedPlanet.angle;
+                ship.vx += Math.cos(angle) * 100;
+                ship.vy += Math.sin(angle) * 100;
+                ship.landedPlanet = null;
+            } else {
+                // Stay Landed
+                const p = ship.landedPlanet;
+                const surfaceDist = p.radius + GameConfig.shipCollisionRadius;
+                ship.x = p.x + Math.cos(p.angle) * surfaceDist;
+                ship.y = p.y + Math.sin(p.angle) * surfaceDist;
+                ship.vx = 0;
+                ship.vy = 0;
+                return false;
+            }
+        }
+
         // Calculate gravity from planets
         let gx = 0;
         let gy = 0;
@@ -39,14 +60,27 @@ export class PhysicsSystem {
 
             // Collision detection
             // Asteroids don't cause Game Over, they are just physical obstacles or background
-            // "Cannot crash into" -> actually means no Game Over collision?
-            // The prompt says "v nih nelzya vrezatsya" (cannot crash into them)
-            // AND "skvoz kotoruyu mozhno proletet" (through which you can fly).
-            // This implies they are sensors/visuals but we can push off them.
-            // So we skip collision check for Game Over.
             if (planet.type !== PlanetType.Asteroid) {
                 if (dist < planet.radius + GameConfig.shipCollisionRadius) {
-                    hasCollided = true;
+                    const speed = Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy);
+                    if (speed < GameConfig.landingMaxSpeed) {
+                        // Land
+                        ship.isLanded = true;
+                        const angle = Math.atan2(ship.y - planet.y, ship.x - planet.x);
+                        ship.landedPlanet = {
+                            x: planet.x,
+                            y: planet.y,
+                            radius: planet.radius,
+                            angle: angle
+                        };
+                        const surfaceDist = planet.radius + GameConfig.shipCollisionRadius;
+                        ship.x = planet.x + Math.cos(angle) * surfaceDist;
+                        ship.y = planet.y + Math.sin(angle) * surfaceDist;
+                        ship.vx = 0;
+                        ship.vy = 0;
+                    } else {
+                        hasCollided = true;
+                    }
                 }
             }
 
@@ -69,6 +103,11 @@ export class PhysicsSystem {
                         if (dist < planet.radius + GameConfig.nearMissDistance && Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy) > GameConfig.nearMissSpeedThreshold) {
                             ship.addFuel(GameConfig.nearMissFuelReward);
                             ship.nearMissTimer = GameConfig.nearMissCooldown; // Cooldown
+
+                            // @ts-ignore
+                            if (GameConfig.debugShowNearMiss === 1 && ship.onNearMiss) {
+                                ship.onNearMiss();
+                            }
                         }
                     }
 

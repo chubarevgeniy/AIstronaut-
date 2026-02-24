@@ -53,6 +53,7 @@ export class GameLoop {
 
         // Connect initial ship
         this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
+        this.ship.onNearMiss = () => this.renderer.showNotification("NEAR MISS +10 FUEL!");
     }
 
     startGame(mode: GameMode, startLy: number = 0) {
@@ -86,6 +87,7 @@ export class GameLoop {
         this.ship = new Ship(0, startY);
         this.ship.vy = -60; // Initial upward velocity
         this.ship.onFuelGained = () => this.renderer.triggerFuelFlash();
+        this.ship.onNearMiss = () => this.renderer.showNotification("NEAR MISS +10 FUEL!");
 
         if (this.mode === GameMode.Zen) {
             this.ship.maxFuel = Infinity;

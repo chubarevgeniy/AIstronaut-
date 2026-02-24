@@ -12,6 +12,9 @@ export class Ship {
     hasEjected: boolean;
     nearMissTimer: number = 0;
     onFuelGained: (() => void) | null = null;
+    isLanded: boolean = false;
+    landedPlanet: { x: number, y: number, radius: number, angle: number } | null = null;
+    onNearMiss: (() => void) | null = null;
 
     constructor(x: number, y: number) {
         this.x = x;

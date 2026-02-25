@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const configPath = path.join(__dirname, '../game_config.json');
 const tsPath = path.join(__dirname, '../src/engine/GameConfig.ts');
 const gdPath = path.join(__dirname, '../godot_project/scripts/GameConfig.gd');
+const csPath = path.join(__dirname, '../unity_project/Assets/Scripts/Core/GameConfig.cs');
 
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
@@ -63,3 +64,47 @@ for (const [key, value] of Object.entries(config)) {
 
 fs.writeFileSync(gdPath, gdContent);
 console.log(`Generated ${gdPath}`);
+
+// C# Generation (Unity)
+let csContent = `using UnityEngine;
+
+namespace Core {
+    public static class GameConfig {
+`;
+
+for (const [key, value] of Object.entries(config)) {
+    // Convert camelCase to PascalCase for C#
+    const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+
+    let csValue = value;
+    let type = 'float';
+
+    if (floatKeys.includes(key)) {
+        type = 'float';
+        if (Number.isInteger(value)) {
+            csValue = `${value}.0f`;
+        } else {
+            csValue = `${value}f`;
+        }
+    } else if (typeof value === 'boolean') {
+        type = 'bool';
+        csValue = value ? 'true' : 'false';
+    } else if (Number.isInteger(value)) {
+        type = 'int';
+    }
+
+    csContent += `        public const ${type} ${pascalKey} = ${csValue};\n`;
+}
+
+csContent += `    }
+}
+`;
+
+// Ensure directory exists
+const csDir = path.dirname(csPath);
+if (!fs.existsSync(csDir)) {
+    fs.mkdirSync(csDir, { recursive: true });
+}
+
+fs.writeFileSync(csPath, csContent);
+console.log(`Generated ${csPath}`);

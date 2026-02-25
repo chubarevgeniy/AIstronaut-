@@ -6,6 +6,7 @@ on:
     paths:
       - 'unity_project/**'
   pull_request:
+    branches: [ "main" ]
     paths:
       - 'unity_project/**'
   workflow_dispatch:

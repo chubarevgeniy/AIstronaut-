@@ -10,6 +10,8 @@ var rotation_speed: float = 5.0
 var is_thrusting: bool = false
 var has_ejected: bool = false
 var near_miss_timer: float = 0.0
+var is_landed: bool = false
+var landed_planet = null
 
 func _ready():
 	add_to_group("player")
@@ -18,6 +20,15 @@ func _ready():
 func _physics_process(delta):
 	if Global.is_game_over or Global.is_paused:
 		return
+
+	if is_landed and is_instance_valid(landed_planet):
+		if Input.is_action_pressed("thrust") and (fuel > 0 or max_fuel == INF):
+			is_landed = false
+			landed_planet = null
+			velocity = Vector2.UP.rotated(rotation) * 100.0
+		else:
+			velocity = Vector2.ZERO
+			return
 
 	# Gravity
 	var planets = get_tree().get_nodes_in_group("planets")
@@ -30,8 +41,12 @@ func _physics_process(delta):
 		# Collision Check
 		if planet.type != "asteroid":
 			if dist < planet.radius + GameConfig.SHIP_COLLISION_RADIUS:
-				die()
-				return
+				if velocity.length() < GameConfig.LANDING_MAX_SPEED:
+					land(planet)
+					return
+				else:
+					die()
+					return
 
 		if dist > 10 and dist < planet.gravity_radius:
 			# Skip asteroids (handled by gravity_radius=0 but explicit check is fine)
@@ -131,6 +146,23 @@ func _physics_process(delta):
 		Global.score = alt
 
 	queue_redraw()
+
+func land(planet):
+	is_landed = true
+	landed_planet = planet
+	velocity = Vector2.ZERO
+
+	# Rotate so butt points to planet (Nose points Outwards)
+	var angle_out = (global_position - planet.global_position).angle()
+	rotation = angle_out + PI/2
+
+	# Snap to surface
+	var dir = (global_position - planet.global_position).normalized()
+	global_position = planet.global_position + dir * (planet.radius + GameConfig.SHIP_COLLISION_RADIUS)
+
+	# Refuel slightly? (Optional, matches Web logic)
+	if max_fuel != INF:
+		add_fuel(5.0)
 
 func _draw():
 	# Simple triangle ship

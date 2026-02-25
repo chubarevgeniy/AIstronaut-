@@ -6,12 +6,10 @@ const defaultValues = { ...GameConfig };
 
 interface DebugMenuProps {
     gameState: GameState;
-    onWarp?: (ly: number) => void;
 }
 
-export const DebugMenu: React.FC<DebugMenuProps> = ({ gameState, onWarp }) => {
+export const DebugMenu: React.FC<DebugMenuProps> = ({ gameState }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [warpLy, setWarpLy] = useState<string>("0");
     // Force update state to re-render inputs when values change
     const [, setTick] = useState(0);
     const forceUpdate = () => setTick(t => t + 1);
@@ -33,13 +31,6 @@ export const DebugMenu: React.FC<DebugMenuProps> = ({ gameState, onWarp }) => {
     const handleExport = () => {
         navigator.clipboard.writeText(JSON.stringify(GameConfig, null, 2));
         alert("Config copied to clipboard!");
-    };
-
-    const handleWarp = () => {
-        const ly = parseFloat(warpLy);
-        if (!isNaN(ly) && onWarp) {
-            onWarp(ly);
-        }
     };
 
     if (gameState === GameState.Playing) return null;
@@ -109,24 +100,6 @@ export const DebugMenu: React.FC<DebugMenuProps> = ({ gameState, onWarp }) => {
             <div style={{ display: 'flex', gap: '5px', marginTop: '10px' }}>
                 <button onClick={handleReset} style={{ flex: 1, padding: '5px', background: '#444', color: 'white', border: 'none', cursor: 'pointer', fontSize: '10px' }}>RESET</button>
                 <button onClick={handleExport} style={{ flex: 1, padding: '5px', background: '#444', color: 'white', border: 'none', cursor: 'pointer', fontSize: '10px' }}>EXPORT</button>
-            </div>
-
-            <div style={{ marginTop: '10px', borderTop: '1px dotted #555', paddingTop: '10px' }}>
-                <div style={{ display: 'flex', gap: '5px' }}>
-                    <input
-                        type="number"
-                        placeholder="LY"
-                        value={warpLy}
-                        onChange={(e) => setWarpLy(e.target.value)}
-                        style={{ width: '60px', background: '#333', color: 'white', border: 'none', padding: '2px' }}
-                    />
-                    <button
-                        onClick={handleWarp}
-                        style={{ flex: 1, padding: '5px', background: '#0066cc', color: 'white', border: 'none', cursor: 'pointer', fontSize: '10px' }}
-                    >
-                        WARP START
-                    </button>
-                </div>
             </div>
         </div>
     );

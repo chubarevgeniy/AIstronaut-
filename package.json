@@ -9,13 +9,9 @@
     "build": "npm run generate-config && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:android": "npm run generate-config && tsc -b && vite build && npx cap sync android",
     "generate-config": "node scripts/generate_config.js"
   },
   "dependencies": {
-    "@capacitor/android": "^8.1.0",
-    "@capacitor/cli": "^8.1.0",
-    "@capacitor/core": "^8.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

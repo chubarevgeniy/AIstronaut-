@@ -1,0 +1,52 @@
+name: Godot Android Build
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'godot_project/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'godot_project/**'
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Android Keystore
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+        working-directory: godot_project
+
+      - name: Setup Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          # Check where templates are and link them if needed.
+          # The image usually has them at /root/.local/share/godot/templates/4.3.stable
+          if [ -d "/root/.local/share/godot/templates" ]; then
+            ln -s /root/.local/share/godot/templates ~/.local/share/godot/export_templates
+          fi
+
+      - name: Export APK
+        run: |
+          mkdir -p android_build
+          godot --headless --verbose --export-debug "Android" android_build/aistronaut.apk
+        working-directory: godot_project
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-android-debug
+          path: godot_project/android_build/aistronaut.apk
